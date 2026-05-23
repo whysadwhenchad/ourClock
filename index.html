@@ -22,7 +22,16 @@
         #left-panel-content { display: flex; flex-direction: column; align-items: center; gap: calc(40px * var(--ui-scale)); }
         #right-panel { flex: 1 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; position: relative; }
         
-        #update-image { width: 100%; height: auto; max-height: 60vh; object-fit: contain; border-radius: calc(12px * var(--ui-scale)); background-color: #111; box-shadow: -5px 5px 20px rgba(0,0,0,0.5); transition: all 0.3s ease; }
+        /* --- NEW SMOOTH REVEAL ANIMATION --- */
+        @keyframes smoothReveal {
+            0% { opacity: 0; transform: translateY(15px) scale(0.97); filter: blur(4px); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+        .animate-reveal {
+            animation: smoothReveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        #update-image { width: 100%; height: auto; max-height: 60vh; object-fit: contain; border-radius: calc(12px * var(--ui-scale)); background-color: #111; box-shadow: -5px 5px 20px rgba(0,0,0,0.5); opacity: 0; }
         
         #update-message { 
             margin-top: calc(20px * var(--ui-scale)); 
@@ -33,6 +42,7 @@
             letter-spacing: 1px;
             line-height: 1.4; 
             word-wrap: break-word; 
+            opacity: 0;
         }
 
         #clock-container { display: flex; align-items: center; gap: calc(20px * var(--clock-scale)); --p: calc(10px * var(--clock-scale)); }
@@ -160,19 +170,34 @@
         function renderScreenData(data) {
             if (!data) return;
             const img = document.getElementById('update-image'); 
+            const msgEl = document.getElementById('update-message');
             
+            // Handle Image Animating & Updating
             if (data.imageUrl && data.imageUrl.trim() !== "") { 
-                img.src = data.imageUrl; 
-                img.style.display = "block"; 
+                if (img.src !== data.imageUrl) {
+                    img.classList.remove('animate-reveal');
+                    void img.offsetWidth; // trigger reflow to restart animation
+                    img.src = data.imageUrl; 
+                    img.style.display = "block"; 
+                    img.classList.add('animate-reveal');
+                }
             } else {
                 img.src = "";
                 img.style.display = "none";
+                img.classList.remove('animate-reveal');
             }
             
+            // Handle Message Animating & Updating
             if (data.message && data.message.trim() !== "") { 
-                document.getElementById('update-message').innerText = data.message; 
+                if (msgEl.innerText !== data.message) {
+                    msgEl.classList.remove('animate-reveal');
+                    void msgEl.offsetWidth; // trigger reflow
+                    msgEl.innerText = data.message; 
+                    msgEl.classList.add('animate-reveal');
+                }
             } else {
-                document.getElementById('update-message').innerText = ""; 
+                msgEl.innerText = ""; 
+                msgEl.classList.remove('animate-reveal');
             }
         }
 

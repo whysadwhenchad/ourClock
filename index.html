@@ -133,7 +133,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC1poEPjr2l_Lakru0_tzSoVlSFkm0OLNI",
@@ -148,17 +148,42 @@
         let myId, partnerId, unsubscribe;
         const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
 
-        window.setIdentity = (id) => {
+        // Helper function to update the screen display
+        function renderScreenData(data) {
+            if (!data) return;
+            
+            if (data.imageUrl && data.imageUrl.trim() !== "") { 
+                const img = document.getElementById('update-image'); 
+                img.src = data.imageUrl; 
+                img.style.display = "block"; 
+            }
+            if (data.message && data.message.trim() !== "") { 
+                document.getElementById('update-message').innerText = data.message; 
+            }
+        }
+
+        window.setIdentity = async (id) => {
             myId = id; partnerId = id === "clock_A" ? "clock_B" : "clock_A";
             localStorage.setItem("loveClock_id", id);
             document.getElementById("startup-screen").style.display = "none";
             document.getElementById("main-ui").style.display = "flex";
+            
+            // 1. FORCED INITIAL LOAD: Get whatever is currently in the database right now
+            try {
+                const docRef = doc(db, "screens", myId);
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    renderScreenData(snap.data());
+                }
+            } catch (err) {
+                console.error("Initial load failed:", err);
+            }
+
+            // 2. LIVE LISTENER: Keep watching for updates in real-time
             if (unsubscribe) unsubscribe();
             unsubscribe = onSnapshot(doc(db, "screens", myId), (snap) => {
                 if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.imageUrl) { const img = document.getElementById('update-image'); img.src = data.imageUrl; img.style.display = "block"; }
-                    if (data.message) document.getElementById('update-message').innerText = data.message;
+                    renderScreenData(snap.data());
                 }
             });
         };
@@ -182,6 +207,8 @@
                 }
                 await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
                 document.getElementById('send-modal').style.display = 'none';
+                document.getElementById('upload-text').value = "";
+                document.getElementById('upload-image').value = "";
             } catch (e) { alert("Failed"); } finally { btn.disabled = false; btn.innerText = "Send"; }
         });
 
@@ -218,7 +245,7 @@
 
         // --- UI Listeners ---
         document.getElementById('settings-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('settings-modal').style.display = 'block'; });
-        document.getElementById('close-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').style.display = 'none');
+        document.getElementById('close-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').style.none = 'none');
         document.getElementById('send-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('send-modal').style.display = 'block'; });
         document.getElementById('cancel-send-btn').addEventListener('click', () => document.getElementById('send-modal').style.display = 'none');
         document.getElementById('clock-size').addEventListener('input', (e) => { document.documentElement.style.setProperty('--clock-scale', e.target.value); localStorage.setItem('loveClock_clockScale', e.target.value); });

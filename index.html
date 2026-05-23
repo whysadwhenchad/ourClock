@@ -167,44 +167,62 @@
         let myId, partnerId, unsubscribe;
         const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
 
+        // Keep track of what is currently on screen
+        let lastRenderedUrl = null;
+        let lastRenderedMsg = null;
+
         function renderScreenData(data) {
             if (!data) return;
-            const img = document.getElementById('update-image'); 
+            
+            const newUrl = (data.imageUrl && data.imageUrl.trim() !== "") ? data.imageUrl : "";
+            const newMsg = (data.message && data.message.trim() !== "") ? data.message : "";
+
+            // If nothing actually changed from what is currently on screen, do nothing
+            if (newUrl === lastRenderedUrl && newMsg === lastRenderedMsg) return;
+
+            const imgEl = document.getElementById('update-image'); 
             const msgEl = document.getElementById('update-message');
-            
-            // Handle Image Animating & Updating with proper load waiting
-            if (data.imageUrl && data.imageUrl.trim() !== "") { 
-                if (img.src !== data.imageUrl) {
-                    // Temporarily hide and remove animation class while downloading
-                    img.classList.remove('animate-reveal');
-                    img.style.display = "none";
-                    
-                    // Only trigger the animation ONCE the image is fully downloaded
-                    img.onload = () => {
-                        img.style.display = "block";
-                        img.classList.add('animate-reveal');
-                    };
-                    
-                    // Setting the src triggers the download
-                    img.src = data.imageUrl; 
-                }
-            } else {
-                img.src = "";
-                img.style.display = "none";
-                img.classList.remove('animate-reveal');
-            }
-            
-            // Handle Message Animating & Updating (Text loads instantly)
-            if (data.message && data.message.trim() !== "") { 
-                if (msgEl.innerText !== data.message) {
-                    msgEl.classList.remove('animate-reveal');
-                    void msgEl.offsetWidth; // trigger reflow
-                    msgEl.innerText = data.message; 
-                    msgEl.classList.add('animate-reveal');
-                }
-            } else {
-                msgEl.innerText = ""; 
+
+            // The function that applies both text and image simultaneously
+            const applyUpdates = () => {
+                // Clear animations and force reflow
+                imgEl.classList.remove('animate-reveal');
                 msgEl.classList.remove('animate-reveal');
+                void imgEl.offsetWidth;
+                void msgEl.offsetWidth;
+
+                // Apply Image
+                if (newUrl !== "") {
+                    imgEl.src = newUrl;
+                    imgEl.style.display = "block";
+                    imgEl.classList.add('animate-reveal');
+                } else {
+                    imgEl.src = "";
+                    imgEl.style.display = "none";
+                }
+                
+                // Apply Message
+                if (newMsg !== "") {
+                    msgEl.innerText = newMsg;
+                    msgEl.classList.add('animate-reveal');
+                } else {
+                    msgEl.innerText = "";
+                }
+
+                // Update trackers
+                lastRenderedUrl = newUrl;
+                lastRenderedMsg = newMsg;
+            };
+
+            // If there is a NEW image to load, preload it in the background first
+            if (newUrl !== "" && newUrl !== lastRenderedUrl) {
+                const preloader = new Image();
+                preloader.onload = applyUpdates; // Swap everything once image is ready
+                preloader.onerror = applyUpdates; // Failsafe: Swap anyway if image fails
+                preloader.src = newUrl; // Triggers the background download
+            } else {
+                // If it's just a text change (or removing an image), swap instantly
+                applyUpdates();
             }
         }
 

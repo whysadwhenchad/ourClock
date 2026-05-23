@@ -155,19 +155,26 @@
 
         function renderScreenData(data) {
             if (!data) return;
+            const img = document.getElementById('update-image'); 
+            
+            // Handle Image Visibility
             if (data.imageUrl && data.imageUrl.trim() !== "") { 
-                const img = document.getElementById('update-image'); 
                 img.src = data.imageUrl; 
                 img.style.display = "block"; 
+            } else {
+                img.src = "";
+                img.style.display = "none";
             }
+            
+            // Handle Text Updates
             if (data.message && data.message.trim() !== "") { 
                 document.getElementById('update-message').innerText = data.message; 
+            } else {
+                document.getElementById('update-message').innerText = ""; 
             }
         }
 
-        // Attached directly to the window so the HTML buttons can ALWAYS find it
         window.setIdentity = async (id) => {
-            // Swap UI instantly to prevent feeling frozen
             document.getElementById("startup-screen").style.display = "none";
             document.getElementById("main-ui").style.display = "flex";
 
@@ -175,9 +182,8 @@
             partnerId = id === "clock_A" ? "clock_B" : "clock_A";
             localStorage.setItem("loveClock_id", id);
             
-            if (!db) return; // Failsafe if Firebase didn't load properly
+            if (!db) return;
 
-            // Safely fetch data
             try {
                 const docRef = doc(db, "screens", myId);
                 const snap = await getDoc(docRef);
@@ -188,7 +194,6 @@
                 console.warn("Initial network fetch failed. Using listener...", err);
             }
 
-            // Real-time listener
             if (unsubscribe) unsubscribe();
             unsubscribe = onSnapshot(doc(db, "screens", myId), (snap) => {
                 if (snap.exists()) {
@@ -207,7 +212,9 @@
             btn.disabled = true; btn.innerText = "Sending...";
             
             try {
-                let url = document.getElementById('update-image').src || "";
+                // Now defaults to blank so previous images are cleared if no new file is attached
+                let url = ""; 
+                
                 if (file) {
                     const formData = new FormData();
                     formData.append('image', file);
@@ -215,7 +222,9 @@
                     const result = await res.json();
                     url = result.data.url;
                 }
+                
                 await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
+                
                 document.getElementById('send-modal').style.display = 'none';
                 document.getElementById('upload-text').value = "";
                 document.getElementById('upload-image').value = "";

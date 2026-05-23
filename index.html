@@ -22,7 +22,7 @@
         #left-panel-content { display: flex; flex-direction: column; align-items: center; gap: calc(40px * var(--ui-scale)); }
         #right-panel { flex: 1 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; position: relative; }
         
-        /* --- NEW SMOOTH REVEAL ANIMATION --- */
+        /* --- SMOOTH REVEAL ANIMATION --- */
         @keyframes smoothReveal {
             0% { opacity: 0; transform: translateY(15px) scale(0.97); filter: blur(4px); }
             100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
@@ -172,14 +172,21 @@
             const img = document.getElementById('update-image'); 
             const msgEl = document.getElementById('update-message');
             
-            // Handle Image Animating & Updating
+            // Handle Image Animating & Updating with proper load waiting
             if (data.imageUrl && data.imageUrl.trim() !== "") { 
                 if (img.src !== data.imageUrl) {
+                    // Temporarily hide and remove animation class while downloading
                     img.classList.remove('animate-reveal');
-                    void img.offsetWidth; // trigger reflow to restart animation
+                    img.style.display = "none";
+                    
+                    // Only trigger the animation ONCE the image is fully downloaded
+                    img.onload = () => {
+                        img.style.display = "block";
+                        img.classList.add('animate-reveal');
+                    };
+                    
+                    // Setting the src triggers the download
                     img.src = data.imageUrl; 
-                    img.style.display = "block"; 
-                    img.classList.add('animate-reveal');
                 }
             } else {
                 img.src = "";
@@ -187,7 +194,7 @@
                 img.classList.remove('animate-reveal');
             }
             
-            // Handle Message Animating & Updating
+            // Handle Message Animating & Updating (Text loads instantly)
             if (data.message && data.message.trim() !== "") { 
                 if (msgEl.innerText !== data.message) {
                     msgEl.classList.remove('animate-reveal');

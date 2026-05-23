@@ -76,12 +76,20 @@
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #779E83; cursor: pointer; margin-top: -6px; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #333; border-radius: 2px; }
-        input[type="file"], textarea { width: 100%; background: #222; color: white; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box; font-family: 'Roboto Condensed', sans-serif; }
-        textarea { resize: vertical; min-height: 80px; }
+        
+        /* --- NEW UPLOAD BOX STYLING --- */
+        #upload-box { width: 100%; height: 160px; border: 2px dashed #444; border-radius: 8px; background-color: #1a1a1a; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.2s, background-color 0.2s; }
+        #upload-box:hover { border-color: #779E83; background-color: #222; }
+        #upload-placeholder { display: flex; flex-direction: column; align-items: center; color: #888; transition: color 0.2s; }
+        .upload-placeholder-icon { width: 36px; height: 36px; margin-bottom: 10px; stroke: #888; transition: stroke 0.2s; }
+        #upload-box:hover #upload-placeholder { color: #ccc; }
+        #upload-box:hover .upload-placeholder-icon { stroke: #ccc; }
+        #upload-preview { width: 100%; height: 100%; object-fit: cover; display: none; }
+        
+        textarea { width: 100%; background: #222; color: white; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box; font-family: 'Roboto Condensed', sans-serif; resize: vertical; min-height: 80px; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
         
         .modal-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; font-family: inherit; text-transform: lowercase; letter-spacing: 1px; }
-        
         .btn-cancel { background: #333; color: white; }
         .btn-primary { background: #779E83; color: #111; }
         .btn-danger { background: #551111; color: white; width: 100%; margin-top: 20px; }
@@ -121,7 +129,7 @@
         </div>
         <div id="right-panel">
             <img id="update-image" src="" alt="Update" style="display: none;">
-            <div id="update-message">I REALLLYYYYYYYYY LOVE YOUUUUUUUU</div>
+            <div id="update-message">Waiting for updates...</div>
         </div>
     </div>
 
@@ -135,7 +143,23 @@
 
     <div id="send-modal" class="modal">
         <h2>send a message</h2>
-        <div class="input-group"><label>picture</label><input type="file" id="upload-image" accept="image/*"></div>
+        
+        <div class="input-group">
+            <label>picture</label>
+            <div id="upload-box" onclick="document.getElementById('upload-image').click()">
+                <div id="upload-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-placeholder-icon">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>click to select photo</span>
+                </div>
+                <img id="upload-preview" src="" alt="Preview">
+            </div>
+            <input type="file" id="upload-image" accept="image/*" style="display: none;">
+        </div>
+
         <div class="input-group"><label>message</label><textarea id="upload-text"></textarea></div>
         <div class="modal-buttons">
             <button id="cancel-send-btn" class="modal-btn btn-cancel">cancel</button>
@@ -167,7 +191,6 @@
         let myId, partnerId, unsubscribe;
         const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
 
-        // Keep track of what is currently on screen
         let lastRenderedUrl = null;
         let lastRenderedMsg = null;
 
@@ -177,21 +200,17 @@
             const newUrl = (data.imageUrl && data.imageUrl.trim() !== "") ? data.imageUrl : "";
             const newMsg = (data.message && data.message.trim() !== "") ? data.message : "";
 
-            // If nothing actually changed from what is currently on screen, do nothing
             if (newUrl === lastRenderedUrl && newMsg === lastRenderedMsg) return;
 
             const imgEl = document.getElementById('update-image'); 
             const msgEl = document.getElementById('update-message');
 
-            // The function that applies both text and image simultaneously
             const applyUpdates = () => {
-                // Clear animations and force reflow
                 imgEl.classList.remove('animate-reveal');
                 msgEl.classList.remove('animate-reveal');
                 void imgEl.offsetWidth;
                 void msgEl.offsetWidth;
 
-                // Apply Image
                 if (newUrl !== "") {
                     imgEl.src = newUrl;
                     imgEl.style.display = "block";
@@ -201,7 +220,6 @@
                     imgEl.style.display = "none";
                 }
                 
-                // Apply Message
                 if (newMsg !== "") {
                     msgEl.innerText = newMsg;
                     msgEl.classList.add('animate-reveal');
@@ -209,19 +227,16 @@
                     msgEl.innerText = "";
                 }
 
-                // Update trackers
                 lastRenderedUrl = newUrl;
                 lastRenderedMsg = newMsg;
             };
 
-            // If there is a NEW image to load, preload it in the background first
             if (newUrl !== "" && newUrl !== lastRenderedUrl) {
                 const preloader = new Image();
-                preloader.onload = applyUpdates; // Swap everything once image is ready
-                preloader.onerror = applyUpdates; // Failsafe: Swap anyway if image fails
-                preloader.src = newUrl; // Triggers the background download
+                preloader.onload = applyUpdates; 
+                preloader.onerror = applyUpdates; 
+                preloader.src = newUrl; 
             } else {
-                // If it's just a text change (or removing an image), swap instantly
                 applyUpdates();
             }
         }
@@ -257,6 +272,35 @@
         window.resetIdentity = () => { localStorage.removeItem("loveClock_id"); location.reload(); };
         const saved = localStorage.getItem("loveClock_id"); if (saved) window.setIdentity(saved);
 
+        // --- NEW LOCAL PREVIEW LOGIC ---
+        document.getElementById('upload-image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('upload-preview');
+            const placeholder = document.getElementById('upload-placeholder');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+        });
+
+        function resetSendMenu() {
+            document.getElementById('upload-text').value = "";
+            document.getElementById('upload-image').value = "";
+            document.getElementById('upload-preview').src = "";
+            document.getElementById('upload-preview').style.display = 'none';
+            document.getElementById('upload-placeholder').style.display = 'flex';
+        }
+
         document.getElementById('submit-send-btn').addEventListener('click', async () => {
             const file = document.getElementById('upload-image').files[0];
             const msg = document.getElementById('upload-text').value;
@@ -277,8 +321,7 @@
                 await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
                 
                 document.getElementById('send-modal').style.display = 'none';
-                document.getElementById('upload-text').value = "";
-                document.getElementById('upload-image').value = "";
+                resetSendMenu();
             } catch (e) { 
                 alert("Failed to send."); 
             } finally { 
@@ -321,7 +364,12 @@
         document.getElementById('settings-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('settings-modal').style.display = 'block'; });
         document.getElementById('close-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').style.display = 'none');
         document.getElementById('send-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('send-modal').style.display = 'block'; });
-        document.getElementById('cancel-send-btn').addEventListener('click', () => document.getElementById('send-modal').style.display = 'none');
+        
+        document.getElementById('cancel-send-btn').addEventListener('click', () => { 
+            document.getElementById('send-modal').style.display = 'none';
+            resetSendMenu();
+        });
+
         document.getElementById('clock-size').addEventListener('input', (e) => { document.documentElement.style.setProperty('--clock-scale', e.target.value); localStorage.setItem('loveClock_clockScale', e.target.value); });
         document.getElementById('ui-size').addEventListener('input', (e) => { document.documentElement.style.setProperty('--ui-scale', e.target.value); localStorage.setItem('loveClock_uiScale', e.target.value); });
     </script>

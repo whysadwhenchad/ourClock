@@ -25,14 +25,11 @@
             margin-top: calc(20px * var(--ui-scale)); 
             width: 100%; 
             text-align: left; 
-            
-            /* --- ROBOTO CONDENSED FONT STYLES --- */
             font-family: 'Roboto Condensed', sans-serif; 
             font-size: calc(1.5rem * var(--ui-scale)); 
             font-weight: 400;
             color: rgba(255, 255, 255, 0.9); 
             letter-spacing: 0.5px;
-            
             line-height: 1.4; 
             word-wrap: break-word; 
         }
@@ -133,7 +130,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, getDocFromToServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC1poEPjr2l_Lakru0_tzSoVlSFkm0OLNI",
@@ -148,10 +145,8 @@
         let myId, partnerId, unsubscribe;
         const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
 
-        // Helper function to update the screen display
         function renderScreenData(data) {
             if (!data) return;
-            
             if (data.imageUrl && data.imageUrl.trim() !== "") { 
                 const img = document.getElementById('update-image'); 
                 img.src = data.imageUrl; 
@@ -168,18 +163,17 @@
             document.getElementById("startup-screen").style.display = "none";
             document.getElementById("main-ui").style.display = "flex";
             
-            // 1. FORCED INITIAL LOAD: Get whatever is currently in the database right now
+            // Forces an accurate load straight from the online database server on initialization
             try {
                 const docRef = doc(db, "screens", myId);
-                const snap = await getDoc(docRef);
+                const snap = await getDocFromToServer(docRef);
                 if (snap.exists()) {
                     renderScreenData(snap.data());
                 }
             } catch (err) {
-                console.error("Initial load failed:", err);
+                console.warn("Server fetch failed, running live sync setup...");
             }
 
-            // 2. LIVE LISTENER: Keep watching for updates in real-time
             if (unsubscribe) unsubscribe();
             unsubscribe = onSnapshot(doc(db, "screens", myId), (snap) => {
                 if (snap.exists()) {
@@ -245,7 +239,7 @@
 
         // --- UI Listeners ---
         document.getElementById('settings-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('settings-modal').style.display = 'block'; });
-        document.getElementById('close-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').style.none = 'none');
+        document.getElementById('close-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').style.display = 'none');
         document.getElementById('send-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('send-modal').style.display = 'block'; });
         document.getElementById('cancel-send-btn').addEventListener('click', () => document.getElementById('send-modal').style.display = 'none');
         document.getElementById('clock-size').addEventListener('input', (e) => { document.documentElement.style.setProperty('--clock-scale', e.target.value); localStorage.setItem('loveClock_clockScale', e.target.value); });

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>which lover are you? :3</title>
+    <title>Love Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap" rel="stylesheet">
     <style>
         :root { --clock-scale: 1; --ui-scale: 1; }
         body { margin: 0; background-color: #1a1a1a; color: white; font-family: -apple-system, sans-serif; height: 100vh; width: 100vw; box-sizing: border-box; overflow: hidden; display: flex; padding: calc(20px * var(--ui-scale)); gap: calc(20px * var(--ui-scale)); }
@@ -19,7 +20,18 @@
         #right-panel { flex: 1 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; position: relative; }
         
         #update-image { width: 100%; height: auto; max-height: 60vh; object-fit: contain; border-radius: calc(12px * var(--ui-scale)); background-color: #111; box-shadow: -5px 5px 20px rgba(0,0,0,0.5); transition: all 0.3s ease; }
-        #update-message { margin-top: calc(20px * var(--ui-scale)); width: 100%; text-align: left; font-size: calc(1.2rem * var(--ui-scale)); line-height: 1.4; color: rgba(255, 255, 255, 0.8); word-wrap: break-word; }
+        
+        #update-message { 
+            margin-top: calc(20px * var(--ui-scale)); 
+            width: 100%; 
+            text-align: left; 
+            font-family: 'Caveat', cursive; 
+            font-size: calc(2.2rem * var(--ui-scale)); 
+            color: #ffcccc; 
+            letter-spacing: 1px;
+            line-height: 1.4; 
+            word-wrap: break-word; 
+        }
 
         #clock-container { display: flex; align-items: center; gap: calc(20px * var(--clock-scale)); --p: calc(10px * var(--clock-scale)); }
         .digit { position: relative; width: calc(100px * var(--clock-scale)); height: calc(184px * var(--clock-scale)); }
@@ -62,9 +74,9 @@
 <body>
 
     <div id="startup-screen">
-        <h1>which lover are you? :3</h1>
-        <button class="identity-btn" onclick="window.setIdentity('clock_A')">lovergirl</button>
-        <button class="identity-btn" onclick="window.setIdentity('clock_B')">loverboy</button>
+        <h1>Love Clock</h1>
+        <button class="identity-btn" onclick="window.setIdentity('clock_A')">Partner 1</button>
+        <button class="identity-btn" onclick="window.setIdentity('clock_B')">Partner 2</button>
     </div>
 
     <div id="main-ui">
@@ -93,7 +105,7 @@
         </div>
         <div id="right-panel">
             <img id="update-image" src="" alt="Update" style="display: none;">
-            <div id="update-message">loading stuff.....</div>
+            <div id="update-message">Waiting for updates...</div>
         </div>
     </div>
 
@@ -102,11 +114,11 @@
         <div class="input-group"><label>Clock Size</label><input type="range" id="clock-size" min="0.4" max="1.8" step="0.05" value="1"></div>
         <div class="input-group"><label>Layout Size</label><input type="range" id="ui-size" min="0.5" max="1.5" step="0.05" value="1"></div>
         <button id="close-settings-btn" class="modal-btn btn-primary" style="width: 100%;">Done</button>
-        <button onclick="window.resetIdentity()" class="modal-btn btn-danger">choose lover</button>
+        <button onclick="window.resetIdentity()" class="modal-btn btn-danger">Switch User</button>
     </div>
 
     <div id="send-modal" class="modal">
-        <h2>love note?</h2>
+        <h2>Send Update</h2>
         <div class="input-group"><label>Photo</label><input type="file" id="upload-image" accept="image/*"></div>
         <div class="input-group"><label>Message</label><textarea id="upload-text"></textarea></div>
         <div class="modal-buttons">
@@ -151,10 +163,10 @@
         const saved = localStorage.getItem("loveClock_id"); if (saved) window.setIdentity(saved);
 
         document.getElementById('submit-send-btn').addEventListener('click', async () => {
-            const file = document.getElementById('upload picture').files[0];
-            const msg = document.getElementById('upload text').value;
+            const file = document.getElementById('upload-image').files[0];
+            const msg = document.getElementById('upload-text').value;
             const btn = document.getElementById('submit-send-btn');
-            btn.disabled = true; btn.innerText = "sendin...";
+            btn.disabled = true; btn.innerText = "Sending...";
             try {
                 let url = document.getElementById('update-image').src || "";
                 if (file) {
@@ -198,7 +210,7 @@
         }
 
         setInterval(updateClock, 1000);
-        updateClock(); // Initialize immediately
+        updateClock(); 
 
         // --- UI Listeners ---
         document.getElementById('settings-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('settings-modal').style.display = 'block'; });

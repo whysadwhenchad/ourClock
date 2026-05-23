@@ -9,12 +9,15 @@
     
     <style>
         :root { --clock-scale: 1; --ui-scale: 1; }
-        body { margin: 0; background-color: #1a1a1a; color: white; font-family: -apple-system, sans-serif; height: 100vh; width: 100vw; box-sizing: border-box; overflow: hidden; display: flex; padding: calc(20px * var(--ui-scale)); gap: calc(20px * var(--ui-scale)); }
+        
+        body { margin: 0; background-color: #1a1a1a; color: white; font-family: 'Roboto Condensed', sans-serif; height: 100vh; width: 100vw; box-sizing: border-box; overflow: hidden; display: flex; padding: calc(20px * var(--ui-scale)); gap: calc(20px * var(--ui-scale)); }
 
         #startup-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #111; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 2.5rem; font-family: 'Roboto Condensed', sans-serif; }
-        .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 250px; font-family: 'Roboto Condensed', sans-serif; }
-        .identity-btn:hover { background-color: #779E83; color: #111; font-weight: bold; }
+        
+        /* --- NEW MENU FONT APPLIED HERE --- */
+        #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 3rem; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 300px; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .identity-btn:hover { background-color: #779E83; color: #111; }
 
         #main-ui { display: none; width: 100%; height: 100%; gap: calc(20px * var(--ui-scale)); }
         #left-panel { flex: 3 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); display: flex; justify-content: center; align-items: center; position: relative; }
@@ -46,7 +49,7 @@
         .seg.e { top: calc(96px * var(--clock-scale)); left: 0; } .seg.c { top: calc(96px * var(--clock-scale)); left: calc(80px * var(--clock-scale)); }
         .colon { display: flex; flex-direction: column; gap: calc(30px * var(--clock-scale)); padding-bottom: calc(20px * var(--clock-scale)); }
         .colon div { width: calc(20px * var(--clock-scale)); height: calc(20px * var(--clock-scale)); background-color: #779E83; border-radius: 4px; }
-        #ampm { font-family: 'Roboto Condensed', sans-serif; font-size: calc(3rem * var(--clock-scale)); font-weight: bold; color: #779E83; margin-left: calc(15px * var(--clock-scale)); align-self: flex-end; margin-bottom: calc(10px * var(--clock-scale)); }
+        #ampm { font-size: calc(3rem * var(--clock-scale)); font-weight: bold; color: #779E83; margin-left: calc(15px * var(--clock-scale)); align-self: flex-end; margin-bottom: calc(10px * var(--clock-scale)); }
 
         .fade-element { transition: opacity 1s ease-in-out; opacity: 1; z-index: 50; }
         #settings-btn { position: absolute; top: calc(25px * var(--ui-scale)); left: calc(25px * var(--ui-scale)); background: none; border: none; cursor: pointer; padding: 0; }
@@ -57,19 +60,25 @@
         #settings-btn:hover .svg-icon, #settings-btn:active .svg-icon, #send-btn:hover .svg-icon, #send-btn:active .svg-icon { opacity: 0.8; }
         #send-btn:hover .plane-icon, #send-btn:active .plane-icon { transform: translate(3px, -3px) scale(1.1); }
 
-        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 15px 50px rgba(0,0,0,0.9); z-index: 100; width: 320px; font-family: 'Roboto Condensed', sans-serif; }
-        .modal h2 { margin-top: 0; color: #779E83; font-size: 1.5rem; text-align: center; margin-bottom: 25px; }
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 15px 50px rgba(0,0,0,0.9); z-index: 100; width: 320px; }
+        
+        /* --- NEW MENU FONT APPLIED HERE --- */
+        .modal h2 { margin-top: 0; color: #779E83; font-size: 1.8rem; text-align: center; margin-bottom: 25px; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9rem; }
+        .input-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 1rem; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
+        
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #779E83; cursor: pointer; margin-top: -6px; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #333; border-radius: 2px; }
-        input[type="file"], textarea { width: 100%; background: #222; color: white; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box; font-family: inherit; }
+        input[type="file"], textarea { width: 100%; background: #222; color: white; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box; font-family: 'Roboto Condensed', sans-serif; }
         textarea { resize: vertical; min-height: 80px; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
-        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: background 0.2s; font-family: 'Roboto Condensed', sans-serif; }
+        
+        /* --- NEW MENU FONT APPLIED HERE --- */
+        .modal-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        
         .btn-cancel { background: #333; color: white; }
-        .btn-primary { background: #779E83; color: #111; font-weight: bold; }
+        .btn-primary { background: #779E83; color: #111; }
         .btn-danger { background: #551111; color: white; width: 100%; margin-top: 20px; }
     </style>
 </head>
@@ -157,7 +166,6 @@
             if (!data) return;
             const img = document.getElementById('update-image'); 
             
-            // Handle Image Visibility
             if (data.imageUrl && data.imageUrl.trim() !== "") { 
                 img.src = data.imageUrl; 
                 img.style.display = "block"; 
@@ -166,7 +174,6 @@
                 img.style.display = "none";
             }
             
-            // Handle Text Updates
             if (data.message && data.message.trim() !== "") { 
                 document.getElementById('update-message').innerText = data.message; 
             } else {
@@ -191,7 +198,7 @@
                     renderScreenData(snap.data());
                 }
             } catch (err) {
-                console.warn("Initial network fetch failed. Using listener...", err);
+                console.warn("Initial fetch failed:", err);
             }
 
             if (unsubscribe) unsubscribe();
@@ -212,7 +219,6 @@
             btn.disabled = true; btn.innerText = "Sending...";
             
             try {
-                // Now defaults to blank so previous images are cleared if no new file is attached
                 let url = ""; 
                 
                 if (file) {

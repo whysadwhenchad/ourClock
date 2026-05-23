@@ -92,7 +92,7 @@
             </div>
         </div>
         <div id="right-panel">
-            <img id="update-image" src="" alt="Update">
+            <img id="update-image" src="" alt="Update" style="display: none;">
             <div id="update-message">Waiting for updates...</div>
         </div>
     </div>
@@ -169,8 +169,38 @@
             } catch (e) { alert("Failed"); } finally { btn.disabled = false; btn.innerText = "Send"; }
         });
 
-        // UI & Clock Logic
-        setInterval(() => { const n = new Date(); let h = n.getHours()%12||12, m = n.getMinutes(); const a = n.getHours()>=12?'PM':'AM'; const hS = h<10?' '+h:h, mS = m<10?'0'+m:m; ['h1','h2','m1','m2'].forEach((id,i) => { const digit = [hS,mS].join('')[i]; const el = document.getElementById(id); el.querySelectorAll('.seg').forEach(s => s.classList.remove('on')); if(digit !== ' ') [/*map*/].forEach(c => el.querySelector('.seg.'+c).classList.add('on')); }); document.getElementById('ampm').innerText = a; }, 1000);
+        // --- 7-SEGMENT CLOCK LOGIC ---
+        const digitMap = {
+            0: ['a','b','c','d','e','f'], 1: ['b','c'], 2: ['a','b','g','e','d'], 3: ['a','b','g','c','d'],
+            4: ['f','g','b','c'], 5: ['a','f','g','c','d'], 6: ['a','f','e','d','c','g'], 7: ['a','b','c'],
+            8: ['a','b','c','d','e','f','g'], 9: ['a','b','c','d','f','g']
+        };
+
+        function setDigit(id, num) {
+            const el = document.getElementById(id);
+            el.querySelectorAll('.seg').forEach(s => s.classList.remove('on'));
+            if (num !== ' ' && digitMap[parseInt(num)]) {
+                digitMap[parseInt(num)].forEach(c => el.querySelector('.seg.' + c).classList.add('on'));
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let h = now.getHours(), m = now.getMinutes();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12; 
+            const hStr = h < 10 ? ' ' + h : h.toString();
+            const mStr = m < 10 ? '0' + m : m.toString();
+
+            setDigit('h1', hStr[0]); setDigit('h2', hStr[1]);
+            setDigit('m1', mStr[0]); setDigit('m2', mStr[1]);
+            document.getElementById('ampm').innerText = ampm;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock(); // Initialize immediately
+
+        // --- UI Listeners ---
         document.getElementById('settings-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('settings-modal').style.display = 'block'; });
         document.getElementById('close-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').style.display = 'none');
         document.getElementById('send-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('send-modal').style.display = 'block'; });

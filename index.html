@@ -13,8 +13,8 @@
 
         #startup-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #111; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
-        #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 3rem; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
-        .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 300px; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 3rem; letter-spacing: 1px; text-transform: lowercase; font-weight: normal; }
+        .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 300px; text-transform: lowercase; letter-spacing: 1px; font-family: inherit; }
         .identity-btn:hover { background-color: #779E83; color: #111; }
 
         #main-ui { display: none; width: 100%; height: 100%; gap: calc(20px * var(--ui-scale)); }
@@ -69,9 +69,9 @@
 
         .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 15px 50px rgba(0,0,0,0.9); z-index: 100; width: 320px; }
         
-        .modal h2 { margin-top: 0; color: #779E83; font-size: 1.8rem; text-align: center; margin-bottom: 25px; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .modal h2 { margin-top: 0; color: #779E83; font-size: 1.8rem; text-align: center; margin-bottom: 25px; text-transform: lowercase; letter-spacing: 1px; font-weight: normal; }
         .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 1rem; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
+        .input-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 1rem; text-transform: lowercase; letter-spacing: 0.5px;}
         
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #779E83; cursor: pointer; margin-top: -6px; }
@@ -80,7 +80,7 @@
         textarea { resize: vertical; min-height: 80px; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
         
-        .modal-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; font-family: inherit; text-transform: lowercase; letter-spacing: 1px; }
         
         .btn-cancel { background: #333; color: white; }
         .btn-primary { background: #779E83; color: #111; }
@@ -127,19 +127,19 @@
 
     <div id="settings-modal" class="modal">
         <h2>change appearance</h2>
-        <div class="input-group"><label>Clock Size</label><input type="range" id="clock-size" min="0.4" max="1.8" step="0.05" value="1"></div>
-        <div class="input-group"><label>Layout Scale</label><input type="range" id="ui-size" min="0.5" max="1.5" step="0.05" value="1"></div>
-        <button id="close-settings-btn" class="modal-btn btn-primary" style="width: 100%;">Done</button>
-        <button onclick="window.resetIdentity()" class="modal-btn btn-danger">Change Romantic</button>
+        <div class="input-group"><label>clock size</label><input type="range" id="clock-size" min="0.4" max="1.8" step="0.05" value="1"></div>
+        <div class="input-group"><label>layout scale</label><input type="range" id="ui-size" min="0.5" max="1.5" step="0.05" value="1"></div>
+        <button id="close-settings-btn" class="modal-btn btn-primary" style="width: 100%;">done</button>
+        <button onclick="window.resetIdentity()" class="modal-btn btn-danger">switch lover</button>
     </div>
 
     <div id="send-modal" class="modal">
-        <h2>Send a message</h2>
-        <div class="input-group"><label>Picture</label><input type="file" id="upload-image" accept="image/*"></div>
-        <div class="input-group"><label>Message</label><textarea id="upload-text"></textarea></div>
+        <h2>send a message</h2>
+        <div class="input-group"><label>picture</label><input type="file" id="upload-image" accept="image/*"></div>
+        <div class="input-group"><label>message</label><textarea id="upload-text"></textarea></div>
         <div class="modal-buttons">
-            <button id="cancel-send-btn" class="modal-btn btn-cancel">Cancel</button>
-            <button id="submit-send-btn" class="modal-btn btn-primary">Send <3</button>
+            <button id="cancel-send-btn" class="modal-btn btn-cancel">cancel</button>
+            <button id="submit-send-btn" class="modal-btn btn-primary">send &lt;3</button>
         </div>
     </div>
 
@@ -261,7 +261,7 @@
             const file = document.getElementById('upload-image').files[0];
             const msg = document.getElementById('upload-text').value;
             const btn = document.getElementById('submit-send-btn');
-            btn.disabled = true; btn.innerText = "Sending...";
+            btn.disabled = true; btn.innerText = "sending...";
             
             try {
                 let url = ""; 
@@ -282,7 +282,7 @@
             } catch (e) { 
                 alert("Failed to send."); 
             } finally { 
-                btn.disabled = false; btn.innerText = "Send"; 
+                btn.disabled = false; btn.innerText = "send <3"; 
             }
         });
 

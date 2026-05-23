@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Love Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap" rel="stylesheet">
     
     <style>
         :root { --clock-scale: 1; --ui-scale: 1; }
@@ -14,7 +13,6 @@
 
         #startup-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #111; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
-        /* --- NEW MENU FONT APPLIED HERE --- */
         #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 3rem; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
         .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 300px; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .identity-btn:hover { background-color: #779E83; color: #111; }
@@ -30,8 +28,7 @@
             margin-top: calc(20px * var(--ui-scale)); 
             width: 100%; 
             text-align: left; 
-            font-family: 'Caveat', cursive; 
-            font-size: calc(2.2rem * var(--ui-scale)); 
+            font-size: calc(1.8rem * var(--ui-scale)); 
             color: #ffcccc; 
             letter-spacing: 1px;
             line-height: 1.4; 
@@ -62,7 +59,6 @@
 
         .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 15px 50px rgba(0,0,0,0.9); z-index: 100; width: 320px; }
         
-        /* --- NEW MENU FONT APPLIED HERE --- */
         .modal h2 { margin-top: 0; color: #779E83; font-size: 1.8rem; text-align: center; margin-bottom: 25px; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 1rem; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -74,7 +70,6 @@
         textarea { resize: vertical; min-height: 80px; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
         
-        /* --- NEW MENU FONT APPLIED HERE --- */
         .modal-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; font-family: 'Franklin Gothic Raw Ultra', 'Franklin Gothic Heavy', 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         
         .btn-cancel { background: #333; color: white; }

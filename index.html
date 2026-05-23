@@ -6,43 +6,115 @@
     <title>Love Clock</title>
     <style>
         :root { --clock-scale: 1; --ui-scale: 1; }
-        body { margin: 0; background: #1a1a1a; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; display: flex; padding: 20px; gap: 20px; }
+        body { margin: 0; background-color: #1a1a1a; color: white; font-family: -apple-system, sans-serif; height: 100vh; width: 100vw; box-sizing: border-box; overflow: hidden; display: flex; padding: calc(20px * var(--ui-scale)); gap: calc(20px * var(--ui-scale)); }
+
+        #startup-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #111; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 2.5rem; }
+        .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 250px; }
+        .identity-btn:hover { background-color: #779E83; color: #111; font-weight: bold; }
+
+        #main-ui { display: none; width: 100%; height: 100%; gap: calc(20px * var(--ui-scale)); }
+        #left-panel { flex: 3 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); display: flex; justify-content: center; align-items: center; position: relative; }
+        #left-panel-content { display: flex; flex-direction: column; align-items: center; gap: calc(40px * var(--ui-scale)); }
+        #right-panel { flex: 1 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; position: relative; }
         
-        #startup-screen { position: absolute; inset: 0; background: #111; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .identity-btn { background: #222; color: #fff; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; }
-        
-        #main-ui { display: none; width: 100%; height: 100%; gap: 20px; }
-        #left-panel { flex: 3; background: #000; border-radius: 16px; display: flex; justify-content: center; align-items: center; }
-        #right-panel { flex: 1; background: #000; border-radius: 16px; padding: 30px; display: flex; flex-direction: column; align-items: flex-start; }
-        #update-image { width: 100%; max-height: 50vh; object-fit: contain; border-radius: 12px; display: none; }
-        
-        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; z-index: 100; width: 300px; }
-        .btn { background: #779E83; border: none; padding: 12px; width: 100%; cursor: pointer; color: #000; font-weight: bold; margin-top: 10px; }
+        #update-image { width: 100%; height: auto; max-height: 60vh; object-fit: contain; border-radius: calc(12px * var(--ui-scale)); background-color: #111; box-shadow: -5px 5px 20px rgba(0,0,0,0.5); transition: all 0.3s ease; }
+        #update-message { margin-top: calc(20px * var(--ui-scale)); width: 100%; text-align: left; font-size: calc(1.2rem * var(--ui-scale)); line-height: 1.4; color: rgba(255, 255, 255, 0.8); word-wrap: break-word; }
+
+        #clock-container { display: flex; align-items: center; gap: calc(20px * var(--clock-scale)); --p: calc(10px * var(--clock-scale)); }
+        .digit { position: relative; width: calc(100px * var(--clock-scale)); height: calc(184px * var(--clock-scale)); }
+        .seg { position: absolute; background-color: #0b140e; transition: background-color 0.1s; border-radius: 0; }
+        .seg.on { background-color: #779E83; }
+        .seg.a, .seg.g, .seg.d { width: calc(76px * var(--clock-scale)); height: calc(20px * var(--clock-scale)); left: calc(12px * var(--clock-scale)); clip-path: polygon(var(--p) 0, calc(100% - var(--p)) 0, 100% 50%, calc(100% - var(--p)) 100%, var(--p) 100%, 0 50%); }
+        .seg.a { top: 0; } .seg.g { top: calc(82px * var(--clock-scale)); } .seg.d { top: calc(164px * var(--clock-scale)); }
+        .seg.f, .seg.b, .seg.e, .seg.c { width: calc(20px * var(--clock-scale)); height: calc(76px * var(--clock-scale)); clip-path: polygon(50% 0, 100% var(--p), 100% calc(100% - var(--p)), 50% 100%, 0 calc(100% - var(--p)), 0 var(--p)); }
+        .seg.f { top: calc(12px * var(--clock-scale)); left: 0; } .seg.b { top: calc(12px * var(--clock-scale)); left: calc(80px * var(--clock-scale)); } 
+        .seg.e { top: calc(96px * var(--clock-scale)); left: 0; } .seg.c { top: calc(96px * var(--clock-scale)); left: calc(80px * var(--clock-scale)); }
+        .colon { display: flex; flex-direction: column; gap: calc(30px * var(--clock-scale)); padding-bottom: calc(20px * var(--clock-scale)); }
+        .colon div { width: calc(20px * var(--clock-scale)); height: calc(20px * var(--clock-scale)); background-color: #779E83; border-radius: 4px; }
+        #ampm { font-size: calc(3rem * var(--clock-scale)); font-weight: bold; color: #779E83; margin-left: calc(15px * var(--clock-scale)); align-self: flex-end; margin-bottom: calc(10px * var(--clock-scale)); }
+
+        .fade-element { transition: opacity 1s ease-in-out; opacity: 1; z-index: 50; }
+        #settings-btn { position: absolute; top: calc(25px * var(--ui-scale)); left: calc(25px * var(--ui-scale)); background: none; border: none; cursor: pointer; padding: 0; }
+        #send-btn { background: none; border: none; cursor: pointer; padding: 0; }
+        .svg-icon { stroke: #ffffff; opacity: 0.3; transition: opacity 0.3s ease, transform 0.4s ease; }
+        .gear-icon { width: calc(32px * var(--ui-scale)); height: calc(32px * var(--ui-scale)); }
+        .plane-icon { width: calc(45px * var(--ui-scale)); height: calc(45px * var(--ui-scale)); }
+        #settings-btn:hover .svg-icon, #settings-btn:active .svg-icon, #send-btn:hover .svg-icon, #send-btn:active .svg-icon { opacity: 0.8; }
+        #send-btn:hover .plane-icon, #send-btn:active .plane-icon { transform: translate(3px, -3px) scale(1.1); }
+
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 15px 50px rgba(0,0,0,0.9); z-index: 100; width: 320px; }
+        .modal h2 { margin-top: 0; color: #779E83; font-size: 1.5rem; text-align: center; margin-bottom: 25px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9rem; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #779E83; cursor: pointer; margin-top: -6px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #333; border-radius: 2px; }
+        input[type="file"], textarea { width: 100%; background: #222; color: white; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box; font-family: inherit; }
+        textarea { resize: vertical; min-height: 80px; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+        .btn-cancel { background: #333; color: white; }
+        .btn-primary { background: #779E83; color: #111; font-weight: bold; }
+        .btn-danger { background: #551111; color: white; width: 100%; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div id="startup-screen">
-        <h1>Love Clock</h1>
-        <!-- Fixed the onclick scope -->
-        <button class="identity-btn" onclick="window.setIdentity('clock_A')">Partner 1</button>
-        <button class="identity-btn" onclick="window.setIdentity('clock_B')">Partner 2</button>
+        <h1>Welcome to Love Clock</h1>
+        <button class="identity-btn" onclick="window.setIdentity('clock_A')">I am Partner 1</button>
+        <button class="identity-btn" onclick="window.setIdentity('clock_B')">I am Partner 2</button>
     </div>
 
     <div id="main-ui">
-        <div id="left-panel"><h1>Love Clock Active</h1></div>
-        <div id="right-panel">
-            <img id="update-image" src="" alt="">
-            <div id="update-message">Waiting for updates...</div>
-            <button class="btn" onclick="document.getElementById('send-modal').style.display='block'">Send Update</button>
+        <button id="settings-btn" class="fade-element">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon gear-icon">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
+
+        <div id="left-panel">
+            <div id="left-panel-content">
+                <div id="clock-container">
+                    <div class="digit" id="h1"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                    <div class="digit" id="h2"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                    <div class="colon"><div></div><div></div></div>
+                    <div class="digit" id="m1"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                    <div class="digit" id="m2"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                    <div id="ampm">AM</div>
+                </div>
+                <button id="send-btn" class="fade-element">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon plane-icon">
+                        <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
         </div>
+
+        <div id="right-panel">
+            <img id="update-image" src="" alt="Update">
+            <div id="update-message">Waiting for updates...</div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <h2>Appearance</h2>
+        <div class="input-group"><label>Clock Size</label><input type="range" id="clock-size" min="0.4" max="1.8" step="0.05" value="1"></div>
+        <div class="input-group"><label>Layout Size</label><input type="range" id="ui-size" min="0.5" max="1.5" step="0.05" value="1"></div>
+        <button id="close-settings-btn" class="modal-btn btn-primary" style="width: 100%;">Done</button>
+        <button onclick="window.resetIdentity()" class="modal-btn btn-danger">Switch User</button>
     </div>
 
     <div id="send-modal" class="modal">
         <h2>Send Update</h2>
-        <input type="file" id="upload-image" accept="image/*">
-        <textarea id="upload-text" style="width:100%; margin: 10px 0; background:#222; color:#fff;"></textarea>
-        <button id="submit-btn" class="btn">Send</button>
+        <div class="input-group"><label>Photo</label><input type="file" id="upload-image" accept="image/*"></div>
+        <div class="input-group"><label>Message</label><textarea id="upload-text"></textarea></div>
+        <div class="modal-buttons">
+            <button id="cancel-send-btn" class="modal-btn btn-cancel">Cancel</button>
+            <button id="submit-send-btn" class="modal-btn btn-primary">Send</button>
+        </div>
     </div>
 
     <script type="module">
@@ -58,50 +130,48 @@
             messagingSenderId: "1016743428252",
             appId: "1:1016743428252:web:fed353c991cbf5a121ad59"
         };
-
         const db = getFirestore(initializeApp(firebaseConfig));
         const storage = getStorage();
 
-        let myId, partnerId;
+        let myId, partnerId, unsubscribe;
 
-        // Make global so HTML onclick can see it
         window.setIdentity = (id) => {
-            myId = id;
-            partnerId = (id === "clock_A") ? "clock_B" : "clock_A";
+            myId = id; partnerId = id === "clock_A" ? "clock_B" : "clock_A";
             localStorage.setItem("loveClock_id", id);
             document.getElementById("startup-screen").style.display = "none";
             document.getElementById("main-ui").style.display = "flex";
-            
-            onSnapshot(doc(db, "screens", myId), (snap) => {
-                if(snap.exists()) {
+            if (unsubscribe) unsubscribe();
+            unsubscribe = onSnapshot(doc(db, "screens", myId), (snap) => {
+                if (snap.exists()) {
                     const data = snap.data();
-                    if(data.imageUrl) {
-                        const img = document.getElementById('update-image');
-                        img.src = data.imageUrl;
-                        img.style.display = "block";
-                    }
-                    if(data.message) document.getElementById('update-message').innerText = data.message;
+                    if (data.imageUrl) { const img = document.getElementById('update-image'); img.src = data.imageUrl; img.style.display = "block"; }
+                    if (data.message) document.getElementById('update-message').innerText = data.message;
                 }
             });
         };
 
-        document.getElementById('submit-btn').addEventListener('click', async () => {
+        window.resetIdentity = () => { localStorage.removeItem("loveClock_id"); location.reload(); };
+        const saved = localStorage.getItem("loveClock_id"); if (saved) window.setIdentity(saved);
+
+        document.getElementById('submit-send-btn').addEventListener('click', async () => {
             const file = document.getElementById('upload-image').files[0];
             const msg = document.getElementById('upload-text').value;
-            let url = document.getElementById('update-image').src;
-
-            if(file) {
-                const sRef = ref(storage, 'uploads/' + Date.now());
-                await uploadBytes(sRef, file);
-                url = await getDownloadURL(sRef);
-            }
-            
-            await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
-            document.getElementById('send-modal').style.display = 'none';
+            const btn = document.getElementById('submit-send-btn');
+            btn.disabled = true; btn.innerText = "Sending...";
+            try {
+                let url = document.getElementById('update-image').src || "";
+                if (file) { const sRef = ref(storage, 'uploads/' + Date.now()); await uploadBytes(sRef, file); url = await getDownloadURL(sRef); }
+                await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
+                document.getElementById('send-modal').style.display = 'none';
+            } catch (e) { alert("Failed"); } finally { btn.disabled = false; btn.innerText = "Send"; }
         });
 
-        const saved = localStorage.getItem("loveClock_id");
-        if (saved) window.setIdentity(saved);
+        // Clock and UI listeners
+        setInterval(() => { const n = new Date(); let h = n.getHours()%12||12, m = n.getMinutes(); const a = n.getHours()>=12?'PM':'AM'; const hS = h<10?' '+h:h, mS = m<10?'0'+m:m; ['h1','h2','m1','m2'].forEach((id,i) => { const digit = [hS,mS].join('')[i]; const el = document.getElementById(id); el.querySelectorAll('.seg').forEach(s => s.classList.remove('on')); if(digit !== ' ') [/*map*/].forEach(c => el.querySelector('.seg.'+c).classList.add('on')); }); document.getElementById('ampm').innerText = a; }, 1000);
+        document.getElementById('settings-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('settings-modal').style.display = 'block'; });
+        document.getElementById('close-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').style.display = 'none');
+        document.getElementById('send-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('send-modal').style.display = 'block'; });
+        document.getElementById('cancel-send-btn').addEventListener('click', () => document.getElementById('send-modal').style.display = 'none');
     </script>
 </body>
 </html>

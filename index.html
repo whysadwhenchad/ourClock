@@ -62,9 +62,9 @@
 <body>
 
     <div id="startup-screen">
-        <h1>Welcome to Love Clock</h1>
-        <button class="identity-btn" onclick="window.setIdentity('clock_A')">I am Partner 1</button>
-        <button class="identity-btn" onclick="window.setIdentity('clock_B')">I am Partner 2</button>
+        <h1>Love Clock</h1>
+        <button class="identity-btn" onclick="window.setIdentity('clock_A')">Partner 1</button>
+        <button class="identity-btn" onclick="window.setIdentity('clock_B')">Partner 2</button>
     </div>
 
     <div id="main-ui">
@@ -74,7 +74,6 @@
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
         </button>
-
         <div id="left-panel">
             <div id="left-panel-content">
                 <div id="clock-container">
@@ -92,7 +91,6 @@
                 </button>
             </div>
         </div>
-
         <div id="right-panel">
             <img id="update-image" src="" alt="Update">
             <div id="update-message">Waiting for updates...</div>
@@ -120,7 +118,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC1poEPjr2l_Lakru0_tzSoVlSFkm0OLNI",
@@ -131,9 +128,9 @@
             appId: "1:1016743428252:web:fed353c991cbf5a121ad59"
         };
         const db = getFirestore(initializeApp(firebaseConfig));
-        const storage = getStorage();
 
         let myId, partnerId, unsubscribe;
+        const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
 
         window.setIdentity = (id) => {
             myId = id; partnerId = id === "clock_A" ? "clock_B" : "clock_A";
@@ -160,18 +157,26 @@
             btn.disabled = true; btn.innerText = "Sending...";
             try {
                 let url = document.getElementById('update-image').src || "";
-                if (file) { const sRef = ref(storage, 'uploads/' + Date.now()); await uploadBytes(sRef, file); url = await getDownloadURL(sRef); }
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: 'POST', body: formData });
+                    const result = await res.json();
+                    url = result.data.url;
+                }
                 await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
                 document.getElementById('send-modal').style.display = 'none';
             } catch (e) { alert("Failed"); } finally { btn.disabled = false; btn.innerText = "Send"; }
         });
 
-        // Clock and UI listeners
+        // UI & Clock Logic
         setInterval(() => { const n = new Date(); let h = n.getHours()%12||12, m = n.getMinutes(); const a = n.getHours()>=12?'PM':'AM'; const hS = h<10?' '+h:h, mS = m<10?'0'+m:m; ['h1','h2','m1','m2'].forEach((id,i) => { const digit = [hS,mS].join('')[i]; const el = document.getElementById(id); el.querySelectorAll('.seg').forEach(s => s.classList.remove('on')); if(digit !== ' ') [/*map*/].forEach(c => el.querySelector('.seg.'+c).classList.add('on')); }); document.getElementById('ampm').innerText = a; }, 1000);
         document.getElementById('settings-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('settings-modal').style.display = 'block'; });
         document.getElementById('close-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').style.display = 'none');
         document.getElementById('send-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('send-modal').style.display = 'block'; });
         document.getElementById('cancel-send-btn').addEventListener('click', () => document.getElementById('send-modal').style.display = 'none');
+        document.getElementById('clock-size').addEventListener('input', (e) => { document.documentElement.style.setProperty('--clock-scale', e.target.value); localStorage.setItem('loveClock_clockScale', e.target.value); });
+        document.getElementById('ui-size').addEventListener('input', (e) => { document.documentElement.style.setProperty('--ui-scale', e.target.value); localStorage.setItem('loveClock_uiScale', e.target.value); });
     </script>
 </body>
 </html>

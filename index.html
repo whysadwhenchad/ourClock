@@ -6,74 +6,102 @@
     <title>Love Clock</title>
     <style>
         :root { --clock-scale: 1; --ui-scale: 1; }
-        body { margin: 0; background: #1a1a1a; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; display: flex; padding: calc(20px * var(--ui-scale)); gap: calc(20px * var(--ui-scale)); }
+        body { margin: 0; background: #1a1a1a; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; display: flex; padding: 20px; gap: 20px; }
         
         #startup-screen { position: absolute; inset: 0; background: #111; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .identity-btn { background: #222; color: #fff; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: 0.2s; }
-        .identity-btn:hover { background: #779E83; color: #111; }
-
-        #main-ui { display: none; width: 100%; height: 100%; gap: calc(20px * var(--ui-scale)); }
-        #left-panel { flex: 3 1 0%; min-width: 0; background: #000; border-radius: calc(16px * var(--ui-scale)); display: flex; justify-content: center; align-items: center; position: relative; }
-        #right-panel { flex: 1 1 0%; min-width: 0; background: #000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); display: flex; flex-direction: column; align-items: flex-start; }
+        .identity-btn { background: #222; color: #fff; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; }
         
-        #update-image { width: 100%; height: auto; max-height: 60vh; object-fit: contain; border-radius: calc(12px * var(--ui-scale)); display: none; }
+        #main-ui { display: none; width: 100%; height: 100%; gap: 20px; }
+        #left-panel { flex: 3; background: #000; border-radius: 16px; display: flex; justify-content: center; align-items: center; }
+        #right-panel { flex: 1; background: #000; border-radius: 16px; padding: 30px; display: flex; flex-direction: column; align-items: flex-start; }
+        #update-image { width: 100%; max-height: 50vh; object-fit: contain; border-radius: 12px; display: none; }
         
-        #clock-container { display: flex; align-items: center; gap: calc(20px * var(--clock-scale)); --p: calc(10px * var(--clock-scale)); }
-        .digit { position: relative; width: calc(100px * var(--clock-scale)); height: calc(184px * var(--clock-scale)); }
-        .seg { position: absolute; background: #0b140e; }
-        .seg.on { background: #779E83; }
-        .seg.a, .seg.g, .seg.d { width: calc(76px * var(--clock-scale)); height: calc(20px * var(--clock-scale)); left: calc(12px * var(--clock-scale)); clip-path: polygon(var(--p) 0, calc(100% - var(--p)) 0, 100% 50%, calc(100% - var(--p)) 100%, var(--p) 100%, 0 50%); }
-        .seg.a { top: 0; } .seg.g { top: calc(82px * var(--clock-scale)); } .seg.d { top: calc(164px * var(--clock-scale)); }
-        .seg.f, .seg.b, .seg.e, .seg.c { width: calc(20px * var(--clock-scale)); height: calc(76px * var(--clock-scale)); clip-path: polygon(50% 0, 100% var(--p), 100% calc(100% - var(--p)), 50% 100%, 0 calc(100% - var(--p)), 0 var(--p)); }
-        .seg.f { top: calc(12px * var(--clock-scale)); left: 0; } .seg.b { top: calc(12px * var(--clock-scale)); left: calc(80px * var(--clock-scale)); } 
-        .seg.e { top: calc(96px * var(--clock-scale)); left: 0; } .seg.c { top: calc(96px * var(--clock-scale)); left: calc(80px * var(--clock-scale)); }
-        
-        .fade-element { transition: opacity 1s; opacity: 1; position: absolute; top: calc(25px * var(--ui-scale)); left: calc(25px * var(--ui-scale)); background: none; border: none; cursor: pointer; }
-        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; z-index: 100; width: 320px; }
-        .input-group { margin-bottom: 20px; }
-        .btn-primary { background: #779E83; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; }
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; z-index: 100; width: 300px; }
+        .btn { background: #779E83; border: none; padding: 12px; width: 100%; cursor: pointer; color: #000; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div id="startup-screen">
         <h1>Love Clock</h1>
-        <button class="identity-btn" onclick="app.setIdentity('clock_A')">Partner 1</button>
-        <button class="identity-btn" onclick="app.setIdentity('clock_B')">Partner 2</button>
+        <!-- Fixed the onclick scope -->
+        <button class="identity-btn" onclick="window.setIdentity('clock_A')">Partner 1</button>
+        <button class="identity-btn" onclick="window.setIdentity('clock_B')">Partner 2</button>
     </div>
 
     <div id="main-ui">
-        <button id="settings-btn" class="fade-element"><svg viewBox="0 0 24 24" width="32" height="32" stroke="#fff" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-        <div id="left-panel"><div id="clock-container">...</div></div>
-        <div id="right-panel"><img id="update-image" src="" alt=""><div id="update-message">Waiting...</div></div>
+        <div id="left-panel"><h1>Love Clock Active</h1></div>
+        <div id="right-panel">
+            <img id="update-image" src="" alt="">
+            <div id="update-message">Waiting for updates...</div>
+            <button class="btn" onclick="document.getElementById('send-modal').style.display='block'">Send Update</button>
+        </div>
     </div>
 
-    <!-- Modals omitted for brevity, logic follows -->
+    <div id="send-modal" class="modal">
+        <h2>Send Update</h2>
+        <input type="file" id="upload-image" accept="image/*">
+        <textarea id="upload-text" style="width:100%; margin: 10px 0; background:#222; color:#fff;"></textarea>
+        <button id="submit-btn" class="btn">Send</button>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
-        const app = {
-            db: getFirestore(initializeApp({ /* Paste config here */ })),
-            storage: getStorage(),
-            msgEl: document.getElementById('update-message'),
-            imgEl: document.getElementById('update-image'),
-            setIdentity: (id) => {
-                localStorage.setItem("loveClock_id", id);
-                document.getElementById("startup-screen").style.display = "none";
-                document.getElementById("main-ui").style.display = "flex";
-                onSnapshot(doc(app.db, "screens", id), (snap) => {
-                    const d = snap.data();
-                    if (d?.imageUrl) { app.imgEl.src = d.imageUrl; app.imgEl.style.display = "block"; }
-                    if (d?.message) app.msgEl.innerText = d.message;
-                });
-            }
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1poEPjr2l_Lakru0_tzSoVlSFkm0OLNI",
+            authDomain: "ourclock-7f9de.firebaseapp.com",
+            projectId: "ourclock-7f9de",
+            storageBucket: "ourclock-7f9de.firebasestorage.app",
+            messagingSenderId: "1016743428252",
+            appId: "1:1016743428252:web:fed353c991cbf5a121ad59"
         };
 
-        // Cache elements and run setup...
-        // Optimized clock logic and event handlers...
+        const db = getFirestore(initializeApp(firebaseConfig));
+        const storage = getStorage();
+
+        let myId, partnerId;
+
+        // Make global so HTML onclick can see it
+        window.setIdentity = (id) => {
+            myId = id;
+            partnerId = (id === "clock_A") ? "clock_B" : "clock_A";
+            localStorage.setItem("loveClock_id", id);
+            document.getElementById("startup-screen").style.display = "none";
+            document.getElementById("main-ui").style.display = "flex";
+            
+            onSnapshot(doc(db, "screens", myId), (snap) => {
+                if(snap.exists()) {
+                    const data = snap.data();
+                    if(data.imageUrl) {
+                        const img = document.getElementById('update-image');
+                        img.src = data.imageUrl;
+                        img.style.display = "block";
+                    }
+                    if(data.message) document.getElementById('update-message').innerText = data.message;
+                }
+            });
+        };
+
+        document.getElementById('submit-btn').addEventListener('click', async () => {
+            const file = document.getElementById('upload-image').files[0];
+            const msg = document.getElementById('upload-text').value;
+            let url = document.getElementById('update-image').src;
+
+            if(file) {
+                const sRef = ref(storage, 'uploads/' + Date.now());
+                await uploadBytes(sRef, file);
+                url = await getDownloadURL(sRef);
+            }
+            
+            await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
+            document.getElementById('send-modal').style.display = 'none';
+        });
+
+        const saved = localStorage.getItem("loveClock_id");
+        if (saved) window.setIdentity(saved);
     </script>
 </body>
 </html>

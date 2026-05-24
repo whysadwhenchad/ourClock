@@ -15,6 +15,9 @@
         #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 3rem; letter-spacing: 1px; text-transform: lowercase; font-weight: normal; }
         .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 300px; text-transform: lowercase; letter-spacing: 1px; font-family: inherit; }
         .identity-btn:hover { background-color: #779E83; color: #111; }
+        #install-btn { display: none; position: absolute; bottom: 24px; right: 24px; background: none; border: 1px solid rgba(119,158,131,0.35); color: rgba(119,158,131,0.7); border-radius: 10px; padding: 10px 16px; font-family: inherit; font-size: 0.8rem; text-transform: lowercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; gap: 8px; align-items: center; }
+        #install-btn:hover { border-color: #779E83; color: #779E83; background: rgba(119,158,131,0.07); }
+        #install-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
         /* ── LAYOUT ──────────────────────────────────────────────────────────── */
         #main-ui { display: none; width: 100%; height: 100%; gap: calc(20px * var(--ui-scale)); }
@@ -44,7 +47,8 @@
         #ampm { font-size: calc(3rem * var(--clock-scale)); font-weight: bold; color: #779E83; margin-left: calc(15px * var(--clock-scale)); align-self: flex-end; margin-bottom: calc(10px * var(--clock-scale)); }
 
         /* ── ICON BUTTONS ────────────────────────────────────────────────────── */
-        .fade-element { transition: opacity 1s ease-in-out; opacity: 1; z-index: 50; }
+        .fade-element { transition: opacity 1.2s ease; opacity: 1; z-index: 50; }
+        .fade-element.idle { opacity: 0 !important; pointer-events: none; }
         #settings-btn { position: absolute; top: calc(25px * var(--ui-scale)); left: calc(25px * var(--ui-scale)); background: none; border: none; cursor: pointer; padding: 0; z-index: 60; }
         #send-btn { background: none; border: none; cursor: pointer; padding: 0; z-index: 60; }
         .svg-icon { stroke: #fff; opacity: 0.3; transition: opacity 0.3s, transform 0.4s; }
@@ -263,6 +267,10 @@
     <h1>which lover are you?</h1>
     <button class="identity-btn" onclick="window.setIdentity('clock_A')">lovergirl</button>
     <button class="identity-btn" onclick="window.setIdentity('clock_B')">loverboy</button>
+    <button id="install-btn">
+        <svg viewBox="0 0 24 24"><path d="M12 2v13M7 11l5 5 5-5"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>
+        add to home screen
+    </button>
 </div>
 
 <div id="main-ui">
@@ -308,7 +316,7 @@
             <!-- info + lyrics + progress -->
             <div id="player-body">
                 <div id="song-meta">
-                    <span id="song-title">reflections</span>
+                    <span id="song-title">our song</span>
                     <span id="song-artist"></span>
                 </div>
 
@@ -659,6 +667,47 @@
         document.getElementById('offset-display').innerText = lyricsOffset.toFixed(1)+'s';
         localStorage.setItem('loveClock_lyricsOffset', e.target.value);
     });
+
+    // ── IDLE FADE ────────────────────────────────────────────────────────────────
+    // Fade out settings + send + music player after 4s of no mouse/touch activity.
+    const fadeEls = document.querySelectorAll('.fade-element');
+    let idleTimer;
+
+    function onActivity() {
+        fadeEls.forEach(el => el.classList.remove('idle'));
+        clearTimeout(idleTimer);
+        // Don't hide if a modal is open
+        const anyModalOpen = [...document.querySelectorAll('.modal')].some(m => m.style.display === 'block');
+        if (!anyModalOpen) {
+            idleTimer = setTimeout(() => fadeEls.forEach(el => el.classList.add('idle')), 4000);
+        }
+    }
+
+    document.addEventListener('mousemove', onActivity);
+    document.addEventListener('mousedown', onActivity);
+    document.addEventListener('touchstart', onActivity, { passive: true });
+    onActivity(); // start the initial timer
+
+    // ── PWA INSTALL BUTTON ───────────────────────────────────────────────────────
+    let deferredInstallPrompt = null;
+    const installBtn = document.getElementById('install-btn');
+
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        installBtn.style.display = 'flex';
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') installBtn.style.display = 'none';
+        deferredInstallPrompt = null;
+    });
+
+    // Hide install btn if already installed
+    window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
 </script>
 </body>
 </html>

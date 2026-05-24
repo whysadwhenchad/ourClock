@@ -5,242 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>:3</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
         :root { --clock-scale: 1; --ui-scale: 1; }
-        
+
         body { margin: 0; background-color: #1a1a1a; color: white; font-family: 'Roboto Mono', monospace; height: 100vh; width: 100vw; box-sizing: border-box; overflow: hidden; display: flex; padding: calc(20px * var(--ui-scale)); gap: calc(20px * var(--ui-scale)); }
 
+        /* ── STARTUP ─────────────────────────────────────────────────────────── */
         #startup-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #111; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        
         #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 3rem; letter-spacing: 1px; text-transform: lowercase; font-weight: normal; }
         .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 300px; text-transform: lowercase; letter-spacing: 1px; font-family: inherit; }
         .identity-btn:hover { background-color: #779E83; color: #111; }
 
+        /* ── LAYOUT ──────────────────────────────────────────────────────────── */
         #main-ui { display: none; width: 100%; height: 100%; gap: calc(20px * var(--ui-scale)); }
-        #left-panel { flex: 3 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); display: flex; justify-content: center; align-items: center; position: relative; }
+        #left-panel { flex: 3 1 0%; min-width: 0; background-color: #000; border-radius: calc(16px * var(--ui-scale)); display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
         #left-panel-content { display: flex; flex-direction: column; align-items: center; gap: calc(40px * var(--ui-scale)); }
-        #right-panel { flex: 1 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; position: relative; overflow-y: auto; }
-        
-        /* --- SMOOTH REVEAL ANIMATION --- */
-        @keyframes smoothReveal {
-            0% { opacity: 0; transform: translateY(15px) scale(0.97); filter: blur(4px); }
-            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-        }
-        .animate-reveal {
-            animation: smoothReveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
+        #right-panel { flex: 1 1 0%; min-width: 0; background-color: #000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; position: relative; overflow-y: auto; }
+
+        /* ── REVEAL ANIMATION ────────────────────────────────────────────────── */
+        @keyframes smoothReveal { from { opacity: 0; transform: translateY(12px) scale(0.97); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+        .animate-reveal { animation: smoothReveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
         #update-image { width: 100%; height: auto; max-height: 60vh; object-fit: contain; border-radius: calc(12px * var(--ui-scale)); background-color: #111; box-shadow: -5px 5px 20px rgba(0,0,0,0.5); opacity: 0; }
-        
-        #update-message { 
-            margin-top: calc(20px * var(--ui-scale)); 
-            width: 100%; 
-            text-align: left; 
-            font-size: calc(1.8rem * var(--ui-scale)); 
-            color: #ffcccc; 
-            letter-spacing: 1px;
-            line-height: 1.4; 
-            word-wrap: break-word; 
-            opacity: 1;
-        }
+        #update-message { margin-top: calc(20px * var(--ui-scale)); width: 100%; text-align: left; font-size: calc(1.8rem * var(--ui-scale)); color: #ffcccc; letter-spacing: 1px; line-height: 1.4; word-wrap: break-word; opacity: 1; }
 
+        /* ── CLOCK ───────────────────────────────────────────────────────────── */
         #clock-container { display: flex; align-items: center; gap: calc(20px * var(--clock-scale)); --p: calc(10px * var(--clock-scale)); }
         .digit { position: relative; width: calc(100px * var(--clock-scale)); height: calc(184px * var(--clock-scale)); }
-        .seg { position: absolute; background-color: #0b140e; transition: background-color 0.1s; border-radius: 0; }
+        .seg { position: absolute; background-color: #0b140e; transition: background-color 0.1s; }
         .seg.on { background-color: #779E83; }
         .seg.a, .seg.g, .seg.d { width: calc(76px * var(--clock-scale)); height: calc(20px * var(--clock-scale)); left: calc(12px * var(--clock-scale)); clip-path: polygon(var(--p) 0, calc(100% - var(--p)) 0, 100% 50%, calc(100% - var(--p)) 100%, var(--p) 100%, 0 50%); }
         .seg.a { top: 0; } .seg.g { top: calc(82px * var(--clock-scale)); } .seg.d { top: calc(164px * var(--clock-scale)); }
         .seg.f, .seg.b, .seg.e, .seg.c { width: calc(20px * var(--clock-scale)); height: calc(76px * var(--clock-scale)); clip-path: polygon(50% 0, 100% var(--p), 100% calc(100% - var(--p)), 50% 100%, 0 calc(100% - var(--p)), 0 var(--p)); }
-        .seg.f { top: calc(12px * var(--clock-scale)); left: 0; } .seg.b { top: calc(12px * var(--clock-scale)); left: calc(80px * var(--clock-scale)); } 
+        .seg.f { top: calc(12px * var(--clock-scale)); left: 0; } .seg.b { top: calc(12px * var(--clock-scale)); left: calc(80px * var(--clock-scale)); }
         .seg.e { top: calc(96px * var(--clock-scale)); left: 0; } .seg.c { top: calc(96px * var(--clock-scale)); left: calc(80px * var(--clock-scale)); }
         .colon { display: flex; flex-direction: column; gap: calc(30px * var(--clock-scale)); padding-bottom: calc(20px * var(--clock-scale)); }
         .colon div { width: calc(20px * var(--clock-scale)); height: calc(20px * var(--clock-scale)); background-color: #779E83; border-radius: 4px; }
         #ampm { font-size: calc(3rem * var(--clock-scale)); font-weight: bold; color: #779E83; margin-left: calc(15px * var(--clock-scale)); align-self: flex-end; margin-bottom: calc(10px * var(--clock-scale)); }
 
+        /* ── ICON BUTTONS ────────────────────────────────────────────────────── */
         .fade-element { transition: opacity 1s ease-in-out; opacity: 1; z-index: 50; }
         #settings-btn { position: absolute; top: calc(25px * var(--ui-scale)); left: calc(25px * var(--ui-scale)); background: none; border: none; cursor: pointer; padding: 0; z-index: 60; }
         #send-btn { background: none; border: none; cursor: pointer; padding: 0; z-index: 60; }
-        .svg-icon { stroke: #ffffff; opacity: 0.3; transition: opacity 0.3s ease, transform 0.4s ease; }
+        .svg-icon { stroke: #fff; opacity: 0.3; transition: opacity 0.3s, transform 0.4s; }
         .gear-icon { width: calc(32px * var(--ui-scale)); height: calc(32px * var(--ui-scale)); }
         .plane-icon { width: calc(45px * var(--ui-scale)); height: calc(45px * var(--ui-scale)); }
-        #settings-btn:hover .svg-icon, #settings-btn:active .svg-icon, #send-btn:hover .svg-icon, #send-btn:active .svg-icon { opacity: 0.8; }
-        #send-btn:hover .plane-icon, #send-btn:active .plane-icon { transform: translate(3px, -3px) scale(1.1); }
+        #settings-btn:hover .svg-icon, #send-btn:hover .svg-icon { opacity: 0.8; }
+        #send-btn:hover .plane-icon { transform: translate(3px, -3px) scale(1.1); }
 
+        /* ── MODALS ──────────────────────────────────────────────────────────── */
         .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 15px 50px rgba(0,0,0,0.9); z-index: 100; width: 320px; }
-        
         .modal h2 { margin-top: 0; color: #779E83; font-size: 1.8rem; text-align: center; margin-bottom: 25px; text-transform: lowercase; letter-spacing: 1px; font-weight: normal; }
         .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 1rem; text-transform: lowercase; letter-spacing: 0.5px;}
-        
+        .input-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 1rem; text-transform: lowercase; letter-spacing: 0.5px; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #779E83; cursor: pointer; margin-top: -6px; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #333; border-radius: 2px; }
-        
-        /* --- UPLOAD BOX STYLING --- */
-        #upload-box { width: 100%; height: 160px; border: 2px dashed #444; border-radius: 8px; background-color: #1a1a1a; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.2s, background-color 0.2s; }
-        #upload-box:hover { border-color: #779E83; background-color: #222; }
-        #upload-placeholder { display: flex; flex-direction: column; align-items: center; color: #888; transition: color 0.2s; }
-        .upload-placeholder-icon { width: 36px; height: 36px; margin-bottom: 10px; stroke: #888; transition: stroke 0.2s; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; border-radius: 2px; }
+        #upload-box { width: 100%; height: 160px; border: 2px dashed #444; border-radius: 8px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.2s, background 0.2s; }
+        #upload-box:hover { border-color: #779E83; background: #222; }
+        #upload-placeholder { display: flex; flex-direction: column; align-items: center; color: #888; }
+        .upload-placeholder-icon { width: 36px; height: 36px; margin-bottom: 10px; stroke: #888; }
         #upload-box:hover #upload-placeholder { color: #ccc; }
         #upload-box:hover .upload-placeholder-icon { stroke: #ccc; }
         #upload-preview { width: 100%; height: 100%; object-fit: cover; display: none; }
-        
         textarea { width: 100%; background: #222; color: white; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box; font-family: inherit; resize: vertical; min-height: 80px; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
-        
         .modal-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; font-family: inherit; text-transform: lowercase; letter-spacing: 1px; }
         .btn-cancel { background: #333; color: white; }
         .btn-primary { background: #779E83; color: #111; }
         .btn-danger { background: #551111; color: white; width: 100%; margin-top: 20px; }
 
-        /* ── PLAYER CARD ─────────────────────────────────────────────────────── */
+        /* ── MUSIC PLAYER ────────────────────────────────────────────────────── */
         #music-container {
             position: absolute;
-            bottom: calc(22px * var(--ui-scale));
-            left:   calc(22px * var(--ui-scale));
-            right:  calc(22px * var(--ui-scale));
+            bottom: calc(20px * var(--ui-scale));
+            left:   calc(20px * var(--ui-scale));
+            right:  calc(20px * var(--ui-scale));
+            z-index: 50;
             display: flex;
             align-items: center;
-            gap: calc(18px * var(--ui-scale));
-            z-index: 50;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: calc(18px * var(--ui-scale));
-            padding: calc(14px * var(--ui-scale)) calc(18px * var(--ui-scale));
+            gap: calc(14px * var(--ui-scale));
+            background: rgba(15,15,15,0.75);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: calc(14px * var(--ui-scale));
+            padding: calc(10px * var(--ui-scale)) calc(14px * var(--ui-scale));
             box-sizing: border-box;
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
         }
 
-        /* ── VINYL DISC ──────────────────────────────────────────────────────── */
+        /* vinyl disc */
         @keyframes spin { to { transform: rotate(360deg); } }
 
         #vinyl-disc {
             flex-shrink: 0;
             position: relative;
-            width:  calc(80px * var(--ui-scale));
-            height: calc(80px * var(--ui-scale));
+            width:  calc(62px * var(--ui-scale));
+            height: calc(62px * var(--ui-scale));
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 0 2px #222, 0 6px 24px rgba(0,0,0,0.7);
-            transition: box-shadow 0.3s;
+            box-shadow: 0 0 0 2px #2a2a2a, 0 4px 16px rgba(0,0,0,0.8);
+            transition: box-shadow 0.25s;
         }
-        #vinyl-disc:hover { box-shadow: 0 0 0 2px #779E83, 0 6px 24px rgba(0,0,0,0.7); }
+        #vinyl-disc:hover {
+            box-shadow: 0 0 0 2px #779E83, 0 4px 16px rgba(0,0,0,0.8);
+        }
 
-        /* grooves underneath art */
+        /* record grooves — base layer */
         #vinyl-grooves {
             position: absolute; inset: 0;
             border-radius: 50%;
-            background: repeating-radial-gradient(
-                circle at center,
-                #1a1a1a 0px, #111 2px, #1a1a1a 4px
-            );
+            background: repeating-radial-gradient(circle at center, #181818 0px, #111 2px, #181818 4px);
         }
+
+        /* cover art — spins when playing */
         #vinyl-art {
             position: absolute; inset: 0;
             border-radius: 50%;
+            width: 100%; height: 100%;
             object-fit: cover;
-            opacity: 0.85;
-            animation: spin 5s linear infinite;
+            animation: spin 6s linear infinite;
             animation-play-state: paused;
             transition: opacity 0.3s;
         }
         #vinyl-disc.playing #vinyl-art { animation-play-state: running; }
 
-        /* centre label */
-        #vinyl-label {
+        /* centre hole */
+        #vinyl-hole {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width:  calc(26px * var(--ui-scale));
-            height: calc(26px * var(--ui-scale));
+            width:  calc(10px * var(--ui-scale));
+            height: calc(10px * var(--ui-scale));
             border-radius: 50%;
             background: #111;
             border: 1px solid #333;
-            z-index: 2;
-            display: flex; align-items: center; justify-content: center;
+            z-index: 3;
         }
-        /* play/pause overlay — visible on hover or when paused */
+
+        /* play/pause icon — fades in on hover or while paused */
         #vinyl-pp {
             position: absolute; inset: 0;
             border-radius: 50%;
-            background: rgba(0,0,0,0.45);
+            background: rgba(0,0,0,0.5);
             display: flex; align-items: center; justify-content: center;
             opacity: 0;
             transition: opacity 0.2s;
-            z-index: 3;
+            z-index: 4;
             pointer-events: none;
         }
-        #vinyl-disc:hover  #vinyl-pp { opacity: 1; }
-        #vinyl-disc.paused #vinyl-pp { opacity: 0.7; }
-        #vinyl-disc.playing:hover #vinyl-pp { opacity: 1; }
-        #vinyl-pp svg { width: calc(22px * var(--ui-scale)); height: calc(22px * var(--ui-scale)); fill: white; }
+        #vinyl-disc:hover #vinyl-pp,
+        #vinyl-disc.paused #vinyl-pp { opacity: 1; }
+        #vinyl-pp svg {
+            width:  calc(18px * var(--ui-scale));
+            height: calc(18px * var(--ui-scale));
+            fill: white;
+            pointer-events: none;
+        }
 
-        /* ── RIGHT BODY ──────────────────────────────────────────────────────── */
+        /* right column */
         #player-body {
             flex: 1;
             min-width: 0;
             display: flex;
             flex-direction: column;
-            gap: calc(8px * var(--ui-scale));
+            gap: calc(5px * var(--ui-scale));
         }
 
-        /* song meta */
-        #song-meta { display: flex; flex-direction: column; gap: 2px; }
-        #song-title  { font-size: calc(0.85rem * var(--ui-scale)); color: #fff; font-weight: bold; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        #song-artist { font-size: calc(0.72rem * var(--ui-scale)); color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* song info */
+        #song-meta { display: flex; flex-direction: column; gap: 1px; }
+        #song-title  { font-size: calc(0.78rem * var(--ui-scale)); color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #song-artist { font-size: calc(0.65rem * var(--ui-scale)); color: rgba(255,255,255,0.38); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* ── LYRICS ──────────────────────────────────────────────────────────── */
+        /* lyrics scroller */
         #lyrics-box {
-            height: calc(60px * var(--ui-scale));
+            height: calc(52px * var(--ui-scale));
             overflow: hidden;
             position: relative;
             pointer-events: none;
-            mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
         }
         #lyrics-content {
             margin: 0; padding: 0; list-style: none;
             will-change: transform;
         }
         .lyric-line {
-            padding: calc(3px * var(--ui-scale)) 0;
-            font-size: calc(0.8rem * var(--ui-scale));
-            line-height: 1.5;
-            color: rgba(255,255,255,0.22);
+            padding: calc(2px * var(--ui-scale)) 0;
+            font-size: calc(0.72rem * var(--ui-scale));
+            line-height: 1.55;
+            color: rgba(255,255,255,0.2);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             transition: color 0.35s ease, font-size 0.35s ease;
         }
         .lyric-line.active {
             color: #779E83;
-            font-size: calc(0.95rem * var(--ui-scale));
+            font-size: calc(0.85rem * var(--ui-scale));
             font-weight: bold;
         }
 
-        /* ── PROGRESS + CONTROLS ─────────────────────────────────────────────── */
+        /* progress row */
         #player-controls {
             display: flex;
             align-items: center;
-            gap: calc(10px * var(--ui-scale));
+            gap: calc(7px * var(--ui-scale));
         }
         #restart-btn {
             flex-shrink: 0;
             background: none; border: none; cursor: pointer; padding: 0; outline: none;
-            color: rgba(255,255,255,0.35);
-            transition: color 0.2s, transform 0.2s;
+            color: rgba(255,255,255,0.3);
+            transition: color 0.2s, transform 0.3s;
             display: flex; align-items: center;
         }
-        #restart-btn:hover { color: rgba(255,255,255,0.85); transform: rotate(-30deg); }
-        #restart-btn svg { width: calc(14px * var(--ui-scale)); height: calc(14px * var(--ui-scale)); stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-
+        #restart-btn:hover { color: rgba(255,255,255,0.8); transform: rotate(-40deg); }
+        #restart-btn svg { width: calc(12px * var(--ui-scale)); height: calc(12px * var(--ui-scale)); stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
         #time-current, #time-total {
             flex-shrink: 0;
-            font-size: calc(0.68rem * var(--ui-scale));
-            color: rgba(255,255,255,0.3);
-            min-width: calc(28px * var(--ui-scale));
+            font-size: calc(0.6rem * var(--ui-scale));
+            color: rgba(255,255,255,0.28);
+            min-width: calc(24px * var(--ui-scale));
         }
         #time-total { text-align: right; }
-
         #progress-bar {
             flex: 1;
             height: calc(3px * var(--ui-scale));
@@ -248,6 +232,7 @@
             border-radius: 99px;
             position: relative;
             cursor: pointer;
+            transition: height 0.15s;
         }
         #progress-bar:hover { height: calc(5px * var(--ui-scale)); }
         #progress-fill {
@@ -255,493 +240,425 @@
             background: #779E83;
             border-radius: 99px;
             pointer-events: none;
-            transition: width 0.25s linear;
         }
         #progress-thumb {
             position: absolute;
-            top: 50%; right: auto;
-            width: calc(10px * var(--ui-scale));
-            height: calc(10px * var(--ui-scale));
+            top: 50%;
+            width:  calc(9px * var(--ui-scale));
+            height: calc(9px * var(--ui-scale));
             background: #fff;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s;
+            transition: opacity 0.15s;
+            left: 0%;
         }
         #progress-bar:hover #progress-thumb { opacity: 1; }
-
     </style>
 </head>
 <body>
 
-    <div id="startup-screen">
-        <h1>which lover are you?</h1>
-        <button class="identity-btn" onclick="window.setIdentity('clock_A')">lovergirl</button>
-        <button class="identity-btn" onclick="window.setIdentity('clock_B')">loverboy</button>
-    </div>
+<div id="startup-screen">
+    <h1>which lover are you?</h1>
+    <button class="identity-btn" onclick="window.setIdentity('clock_A')">lovergirl</button>
+    <button class="identity-btn" onclick="window.setIdentity('clock_B')">loverboy</button>
+</div>
 
-    <div id="main-ui">
-        <button id="settings-btn" class="fade-element">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon gear-icon">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-        </button>
+<div id="main-ui">
+    <button id="settings-btn" class="fade-element">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon gear-icon">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+    </button>
 
-        <div id="left-panel">
-            <div id="left-panel-content">
-                <div id="clock-container">
-                    <div class="digit" id="h1"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
-                    <div class="digit" id="h2"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
-                    <div class="colon"><div></div><div></div></div>
-                    <div class="digit" id="m1"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
-                    <div class="digit" id="m2"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
-                    <div id="ampm">am</div>
-                </div>
-                <button id="send-btn" class="fade-element">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon plane-icon">
-                        <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
+    <div id="left-panel">
+        <div id="left-panel-content">
+            <div id="clock-container">
+                <div class="digit" id="h1"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                <div class="digit" id="h2"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                <div class="colon"><div></div><div></div></div>
+                <div class="digit" id="m1"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                <div class="digit" id="m2"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                <div id="ampm">am</div>
             </div>
-        </div>
-        <div id="right-panel">
-            <img id="update-image" src="" alt="Update" style="display: none;">
-            <div id="update-message">Waiting for updates...</div>
-        </div>
-
-        <div id="music-container" class="fade-element">
-            <audio id="audio-engine" src="song.mp3"></audio>
-            
-            <button id="restart-btn" title="Restart Song">
-                <svg viewBox="0 0 24 24" class="restart-icon">
-                    <polyline points="1 4 1 10 7 10"></polyline>
-                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            <button id="send-btn" class="fade-element">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon plane-icon">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                 </svg>
             </button>
+        </div>
 
-            <div id="vinyl-player">
-                <img id="vinyl-cover" src="cover.jpg" onerror="this.style.display='none'">
+        <!-- ── MUSIC PLAYER ── -->
+        <div id="music-container" class="fade-element">
+            <audio id="audio-engine" src="song.mp3" preload="auto"></audio>
+
+            <!-- vinyl -->
+            <div id="vinyl-disc" class="paused">
+                <div id="vinyl-grooves"></div>
+                <img id="vinyl-art" src="cover.jpg" alt="" onerror="this.style.opacity='0'">
                 <div id="vinyl-hole"></div>
-                <svg id="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            </div>
-
-            <div id="lyrics-box">
-                <ul id="lyrics-content">
-                    <li class="lyric-line active">Loading lyrics...</li>
-                </ul>
-            </div>
-        </div>
-
-    </div>
-
-    <div id="settings-modal" class="modal">
-        <h2>change appearance</h2>
-        <div class="input-group"><label>clock size</label><input type="range" id="clock-size" min="0.4" max="1.8" step="0.05" value="1"></div>
-        <div class="input-group"><label>layout scale</label><input type="range" id="ui-size" min="0.5" max="1.5" step="0.05" value="1"></div>
-        <div class="input-group">
-            <label>lyrics offset (seconds): <span id="offset-display">0.0s</span></label>
-            <input type="range" id="lyrics-offset" min="-30" max="30" step="0.5" value="0">
-        </div>
-        <button id="close-settings-btn" class="modal-btn btn-primary" style="width: 100%;">done</button>
-        <button onclick="window.resetIdentity()" class="modal-btn btn-danger">switch lover</button>
-    </div>
-
-    <div id="send-modal" class="modal">
-        <h2>send a message</h2>
-        <div class="input-group">
-            <label>picture</label>
-            <div id="upload-box" onclick="document.getElementById('upload-image').click()">
-                <div id="upload-placeholder">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-placeholder-icon">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    <span>click to select photo</span>
+                <div id="vinyl-pp">
+                    <svg id="pp-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 </div>
-                <img id="upload-preview" src="" alt="Preview">
             </div>
-            <input type="file" id="upload-image" accept="image/*" style="display: none;">
-        </div>
-        <div class="input-group"><label>message</label><textarea id="upload-text"></textarea></div>
-        <div class="modal-buttons">
-            <button id="cancel-send-btn" class="modal-btn btn-cancel">cancel</button>
-            <button id="submit-send-btn" class="modal-btn btn-primary">send &lt;3</button>
+
+            <!-- info + lyrics + progress -->
+            <div id="player-body">
+                <div id="song-meta">
+                    <span id="song-title">our song</span>
+                    <span id="song-artist"></span>
+                </div>
+
+                <div id="lyrics-box">
+                    <ul id="lyrics-content">
+                        <li class="lyric-line active">♪</li>
+                    </ul>
+                </div>
+
+                <div id="player-controls">
+                    <button id="restart-btn" title="restart">
+                        <svg viewBox="0 0 24 24">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                    </button>
+                    <span id="time-current">0:00</span>
+                    <div id="progress-bar">
+                        <div id="progress-fill"></div>
+                        <div id="progress-thumb"></div>
+                    </div>
+                    <span id="time-total">0:00</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    <div id="right-panel">
+        <img id="update-image" src="" alt="Update" style="display:none;">
+        <div id="update-message">Waiting for updates...</div>
+    </div>
+</div>
 
-        // --- FIREBASE INIT ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyC1poEPjr2l_Lakru0_tzSoVlSFkm0OLNI",
-            authDomain: "ourclock-7f9de.firebaseapp.com",
-            projectId: "ourclock-7f9de",
-            storageBucket: "ourclock-7f9de.firebasestorage.app",
-            messagingSenderId: "1016743428252",
-            appId: "1:1016743428252:web:fed353c991cbf5a121ad59"
+<!-- settings modal -->
+<div id="settings-modal" class="modal">
+    <h2>change appearance</h2>
+    <div class="input-group"><label>clock size</label><input type="range" id="clock-size" min="0.4" max="1.8" step="0.05" value="1"></div>
+    <div class="input-group"><label>layout scale</label><input type="range" id="ui-size" min="0.5" max="1.5" step="0.05" value="1"></div>
+    <div class="input-group">
+        <label>lyrics offset: <span id="offset-display">0.0s</span></label>
+        <input type="range" id="lyrics-offset" min="-30" max="30" step="0.5" value="0">
+    </div>
+    <button id="close-settings-btn" class="modal-btn btn-primary" style="width:100%;">done</button>
+    <button onclick="window.resetIdentity()" class="modal-btn btn-danger">switch lover</button>
+</div>
+
+<!-- send modal -->
+<div id="send-modal" class="modal">
+    <h2>send a message</h2>
+    <div class="input-group">
+        <label>picture</label>
+        <div id="upload-box" onclick="document.getElementById('upload-image').click()">
+            <div id="upload-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-placeholder-icon">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>click to select photo</span>
+            </div>
+            <img id="upload-preview" src="" alt="Preview">
+        </div>
+        <input type="file" id="upload-image" accept="image/*" style="display:none;">
+    </div>
+    <div class="input-group"><label>message</label><textarea id="upload-text"></textarea></div>
+    <div class="modal-buttons">
+        <button id="cancel-send-btn" class="modal-btn btn-cancel">cancel</button>
+        <button id="submit-send-btn" class="modal-btn btn-primary">send &lt;3</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // ── FIREBASE ────────────────────────────────────────────────────────────────
+    const firebaseConfig = {
+        apiKey: "AIzaSyC1poEPjr2l_Lakru0_tzSoVlSFkm0OLNI",
+        authDomain: "ourclock-7f9de.firebaseapp.com",
+        projectId: "ourclock-7f9de",
+        storageBucket: "ourclock-7f9de.firebasestorage.app",
+        messagingSenderId: "1016743428252",
+        appId: "1:1016743428252:web:fed353c991cbf5a121ad59"
+    };
+    let db;
+    try { const app = initializeApp(firebaseConfig); db = getFirestore(app); }
+    catch(e) { console.error("Firebase init failed:", e); }
+
+    // ── STATE ───────────────────────────────────────────────────────────────────
+    let myId, partnerId, unsubscribe;
+    const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
+    let lastRenderedUrl = null, lastRenderedMsg = null;
+    let lyricsOffset = 0;
+
+    // ── RESTORE PREFERENCES ─────────────────────────────────────────────────────
+    const savedClockScale    = localStorage.getItem('loveClock_clockScale');
+    const savedUiScale       = localStorage.getItem('loveClock_uiScale');
+    const savedLyricsOffset  = localStorage.getItem('loveClock_lyricsOffset');
+
+    if (savedClockScale) { document.documentElement.style.setProperty('--clock-scale', savedClockScale); document.getElementById('clock-size').value = savedClockScale; }
+    if (savedUiScale)    { document.documentElement.style.setProperty('--ui-scale', savedUiScale);       document.getElementById('ui-size').value = savedUiScale; }
+    if (savedLyricsOffset) {
+        lyricsOffset = parseFloat(savedLyricsOffset);
+        document.getElementById('lyrics-offset').value = savedLyricsOffset;
+        document.getElementById('offset-display').innerText = lyricsOffset.toFixed(1) + 's';
+    }
+
+    // ── SYNC ENGINE ─────────────────────────────────────────────────────────────
+    function renderScreenData(data) {
+        if (!data) return;
+        const newUrl = (data.imageUrl && data.imageUrl.trim()) ? data.imageUrl : "";
+        const newMsg = (data.message  && data.message.trim())  ? data.message  : "";
+        if (newUrl === lastRenderedUrl && newMsg === lastRenderedMsg) return;
+
+        const imgEl = document.getElementById('update-image');
+        const msgEl = document.getElementById('update-message');
+
+        const apply = () => {
+            imgEl.classList.remove('animate-reveal'); msgEl.classList.remove('animate-reveal');
+            void imgEl.offsetWidth; void msgEl.offsetWidth;
+            if (newUrl) { imgEl.src = newUrl; imgEl.style.display = "block"; imgEl.classList.add('animate-reveal'); }
+            else        { imgEl.src = "";     imgEl.style.display = "none"; }
+            if (newMsg) { msgEl.innerText = newMsg; msgEl.classList.add('animate-reveal'); }
+            else        { msgEl.innerText = ""; }
+            lastRenderedUrl = newUrl; lastRenderedMsg = newMsg;
         };
-        
-        let db;
+
+        if (newUrl && newUrl !== lastRenderedUrl) {
+            const p = new Image(); p.onload = apply; p.onerror = apply; p.src = newUrl;
+        } else { apply(); }
+    }
+
+    window.setIdentity = async (id) => {
+        document.getElementById("startup-screen").style.display = "none";
+        document.getElementById("main-ui").style.display = "flex";
+        myId = id; partnerId = id === "clock_A" ? "clock_B" : "clock_A";
+        localStorage.setItem("loveClock_id", id);
+        loadLyrics();
+        if (!db) return;
+        try { const snap = await getDoc(doc(db, "screens", myId)); if (snap.exists()) renderScreenData(snap.data()); }
+        catch(e) { console.warn("Initial fetch failed:", e); }
+        if (unsubscribe) unsubscribe();
+        unsubscribe = onSnapshot(doc(db, "screens", myId), snap => { if (snap.exists()) renderScreenData(snap.data()); });
+    };
+
+    window.resetIdentity = () => { localStorage.removeItem("loveClock_id"); location.reload(); };
+
+    const saved = localStorage.getItem("loveClock_id");
+    if (saved) window.setIdentity(saved);
+
+    // ── UPLOAD ──────────────────────────────────────────────────────────────────
+    document.getElementById('upload-image').addEventListener('change', e => {
+        const file = e.target.files[0];
+        const preview = document.getElementById('upload-preview');
+        const placeholder = document.getElementById('upload-placeholder');
+        if (file) {
+            const r = new FileReader();
+            r.onload = ev => { preview.src = ev.target.result; preview.style.display = 'block'; placeholder.style.display = 'none'; };
+            r.readAsDataURL(file);
+        } else { preview.src = ''; preview.style.display = 'none'; placeholder.style.display = 'flex'; }
+    });
+
+    function resetSendMenu() {
+        document.getElementById('upload-text').value = "";
+        document.getElementById('upload-image').value = "";
+        document.getElementById('upload-preview').src = "";
+        document.getElementById('upload-preview').style.display = 'none';
+        document.getElementById('upload-placeholder').style.display = 'flex';
+    }
+
+    document.getElementById('submit-send-btn').addEventListener('click', async () => {
+        const file = document.getElementById('upload-image').files[0];
+        const msg  = document.getElementById('upload-text').value;
+        const btn  = document.getElementById('submit-send-btn');
+        btn.disabled = true; btn.innerText = "sending...";
         try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-        } catch(e) {
-            console.error("Firebase init failed:", e);
-        }
-
-        let myId, partnerId, unsubscribe;
-        const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
-        let lastRenderedUrl = null;
-        let lastRenderedMsg = null;
-        let lyricsOffset = 0;
-
-        // --- SYNC ENGINE ---
-        function renderScreenData(data) {
-            if (!data) return;
-            const newUrl = (data.imageUrl && data.imageUrl.trim() !== "") ? data.imageUrl : "";
-            const newMsg = (data.message && data.message.trim() !== "") ? data.message : "";
-            if (newUrl === lastRenderedUrl && newMsg === lastRenderedMsg) return;
-
-            const imgEl = document.getElementById('update-image'); 
-            const msgEl = document.getElementById('update-message');
-
-            const applyUpdates = () => {
-                imgEl.classList.remove('animate-reveal');
-                msgEl.classList.remove('animate-reveal');
-                void imgEl.offsetWidth;
-                void msgEl.offsetWidth;
-
-                if (newUrl !== "") {
-                    imgEl.src = newUrl;
-                    imgEl.style.display = "block";
-                    imgEl.classList.add('animate-reveal');
-                } else {
-                    imgEl.src = "";
-                    imgEl.style.display = "none";
-                }
-                
-                if (newMsg !== "") {
-                    msgEl.innerText = newMsg;
-                    msgEl.classList.add('animate-reveal');
-                } else {
-                    msgEl.innerText = "";
-                }
-
-                lastRenderedUrl = newUrl;
-                lastRenderedMsg = newMsg;
-            };
-
-            if (newUrl !== "" && newUrl !== lastRenderedUrl) {
-                const preloader = new Image();
-                preloader.onload = applyUpdates;
-                preloader.onerror = applyUpdates;
-                preloader.src = newUrl; 
-            } else {
-                applyUpdates();
-            }
-        }
-
-        window.setIdentity = async (id) => {
-            document.getElementById("startup-screen").style.display = "none";
-            document.getElementById("main-ui").style.display = "flex";
-            myId = id;
-            partnerId = id === "clock_A" ? "clock_B" : "clock_A";
-            localStorage.setItem("loveClock_id", id);
-            
-            loadLyrics();
-
-            if (!db) return;
-            try {
-                const docRef = doc(db, "screens", myId);
-                const snap = await getDoc(docRef);
-                if (snap.exists()) renderScreenData(snap.data());
-            } catch (err) {
-                console.warn("Initial fetch failed:", err);
-            }
-
-            if (unsubscribe) unsubscribe();
-            unsubscribe = onSnapshot(doc(db, "screens", myId), (snap) => {
-                if (snap.exists()) renderScreenData(snap.data());
-            });
-        };
-
-        window.resetIdentity = () => {
-            localStorage.removeItem("loveClock_id");
-            location.reload();
-        };
-
-        // --- RESTORE SAVED PREFERENCES ---
-        const savedClockScale = localStorage.getItem('loveClock_clockScale');
-        const savedUiScale = localStorage.getItem('loveClock_uiScale');
-        const savedLyricsOffset = localStorage.getItem('loveClock_lyricsOffset');
-
-        if (savedClockScale) {
-            document.documentElement.style.setProperty('--clock-scale', savedClockScale);
-            document.getElementById('clock-size').value = savedClockScale;
-        }
-        if (savedUiScale) {
-            document.documentElement.style.setProperty('--ui-scale', savedUiScale);
-            document.getElementById('ui-size').value = savedUiScale;
-        }
-        if (savedLyricsOffset) {
-            lyricsOffset = parseFloat(savedLyricsOffset);
-            document.getElementById('lyrics-offset').value = savedLyricsOffset;
-            document.getElementById('offset-display').innerText = parseFloat(savedLyricsOffset).toFixed(1) + 's';
-        }
-
-        const saved = localStorage.getItem("loveClock_id");
-        if (saved) window.setIdentity(saved);
-
-        // --- UPLOAD LOGIC ---
-        document.getElementById('upload-image').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const preview = document.getElementById('upload-preview');
-            const placeholder = document.getElementById('upload-placeholder');
+            let url = "";
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    preview.src = event.target.result;
-                    preview.style.display = 'block';
-                    placeholder.style.display = 'none';
-                }
-                reader.readAsDataURL(file);
-            } else {
-                preview.src = '';
-                preview.style.display = 'none';
-                placeholder.style.display = 'flex';
+                const fd = new FormData(); fd.append('image', file);
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: 'POST', body: fd });
+                url = (await res.json()).data.url;
             }
-        });
+            await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
+            document.getElementById('send-modal').style.display = 'none'; resetSendMenu();
+        } catch { alert("Failed to send."); }
+        finally { btn.disabled = false; btn.innerText = "send <3"; }
+    });
 
-        function resetSendMenu() {
-            document.getElementById('upload-text').value = "";
-            document.getElementById('upload-image').value = "";
-            document.getElementById('upload-preview').src = "";
-            document.getElementById('upload-preview').style.display = 'none';
-            document.getElementById('upload-placeholder').style.display = 'flex';
+    // ── CLOCK ───────────────────────────────────────────────────────────────────
+    const digitMap = { 0:['a','b','c','d','e','f'], 1:['b','c'], 2:['a','b','g','e','d'], 3:['a','b','g','c','d'], 4:['f','g','b','c'], 5:['a','f','g','c','d'], 6:['a','f','e','d','c','g'], 7:['a','b','c'], 8:['a','b','c','d','e','f','g'], 9:['a','b','c','d','f','g'] };
+
+    function setDigit(id, num) {
+        const el = document.getElementById(id);
+        el.querySelectorAll('.seg').forEach(s => s.classList.remove('on'));
+        if (num !== ' ' && digitMap[parseInt(num)]) digitMap[parseInt(num)].forEach(c => el.querySelector('.seg.'+c).classList.add('on'));
+    }
+    function updateClock() {
+        const now = new Date(); let h = now.getHours(), m = now.getMinutes();
+        const ampm = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
+        const hStr = h < 10 ? ' '+h : String(h), mStr = m < 10 ? '0'+m : String(m);
+        setDigit('h1',hStr[0]); setDigit('h2',hStr[1]); setDigit('m1',mStr[0]); setDigit('m2',mStr[1]);
+        document.getElementById('ampm').innerText = ampm;
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    // ── MUSIC PLAYER ────────────────────────────────────────────────────────────
+    const audio         = document.getElementById('audio-engine');
+    const vinylDisc     = document.getElementById('vinyl-disc');
+    const ppIcon        = document.getElementById('pp-icon');
+    const lyricsBox     = document.getElementById('lyrics-box');
+    const lyricsContent = document.getElementById('lyrics-content');
+    const progressFill  = document.getElementById('progress-fill');
+    const progressThumb = document.getElementById('progress-thumb');
+    const progressBar   = document.getElementById('progress-bar');
+    const timeCurrent   = document.getElementById('time-current');
+    const timeTotal     = document.getElementById('time-total');
+
+    let parsedLyrics = [], activeIndex = -1;
+
+    // play / pause state
+    function setPlayState(playing) {
+        if (playing) {
+            audio.play();
+            vinylDisc.classList.add('playing');
+            vinylDisc.classList.remove('paused');
+            ppIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+        } else {
+            audio.pause();
+            vinylDisc.classList.remove('playing');
+            vinylDisc.classList.add('paused');
+            ppIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
         }
+    }
 
-        document.getElementById('submit-send-btn').addEventListener('click', async () => {
-            const file = document.getElementById('upload-image').files[0];
-            const msg = document.getElementById('upload-text').value;
-            const btn = document.getElementById('submit-send-btn');
-            btn.disabled = true;
-            btn.innerText = "sending...";
-            try {
-                let url = ""; 
-                if (file) {
-                    const formData = new FormData();
-                    formData.append('image', file);
-                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: 'POST', body: formData });
-                    const result = await res.json();
-                    url = result.data.url;
-                }
-                await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
-                document.getElementById('send-modal').style.display = 'none';
-                resetSendMenu();
-            } catch (e) {
-                alert("Failed to send.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "send <3";
-            }
-        });
+    vinylDisc.addEventListener('click', () => setPlayState(audio.paused));
+    document.getElementById('restart-btn').addEventListener('click', () => { audio.currentTime = 0; setPlayState(true); });
 
-        // --- CLOCK ENGINE ---
-        const digitMap = {
-            0: ['a','b','c','d','e','f'], 1: ['b','c'], 2: ['a','b','g','e','d'],
-            3: ['a','b','g','c','d'], 4: ['f','g','b','c'], 5: ['a','f','g','c','d'],
-            6: ['a','f','e','d','c','g'], 7: ['a','b','c'], 8: ['a','b','c','d','e','f','g'],
-            9: ['a','b','c','d','f','g']
-        };
+    // time formatter
+    function fmt(s) { const m = Math.floor(s/60); return m+':'+(Math.floor(s%60)+'').padStart(2,'0'); }
 
-        function setDigit(id, num) {
-            const el = document.getElementById(id);
-            el.querySelectorAll('.seg').forEach(s => s.classList.remove('on'));
-            if (num !== ' ' && digitMap[parseInt(num)]) {
-                digitMap[parseInt(num)].forEach(c => el.querySelector('.seg.' + c).classList.add('on'));
-            }
+    // progress bar — update fill + thumb position
+    audio.addEventListener('timeupdate', () => {
+        const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+        progressFill.style.width  = pct + '%';
+        progressThumb.style.left  = pct + '%';
+        timeCurrent.textContent   = fmt(audio.currentTime);
+        syncLyrics();
+    });
+    audio.addEventListener('loadedmetadata', () => { timeTotal.textContent = fmt(audio.duration); });
+    audio.addEventListener('ended', () => setPlayState(false));
+
+    // seek on click
+    progressBar.addEventListener('click', e => {
+        const rect = progressBar.getBoundingClientRect();
+        const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        audio.currentTime = pct * audio.duration;
+    });
+
+    // ── LYRICS ENGINE ────────────────────────────────────────────────────────────
+    async function loadLyrics() {
+        try {
+            const res = await fetch('song.lrc');
+            if (!res.ok) throw new Error('no lrc');
+            const raw = await res.text();
+
+            // Parse metadata tags for title/artist
+            const meta = {};
+            raw.split('\n').forEach(line => {
+                const m = line.match(/^\[([a-z]+):(.*)\]$/i);
+                if (m) meta[m[1].toLowerCase()] = m[2].trim();
+            });
+            if (meta.ti) document.getElementById('song-title').textContent  = meta.ti;
+            if (meta.ar) document.getElementById('song-artist').textContent = meta.ar;
+
+            // Parse timed lines
+            parsedLyrics = raw.split('\n').reduce((acc, line) => {
+                const m = line.match(/\[(\d+):(\d{2}(?:\.\d+)?)\](.*)/);
+                if (m) acc.push({ time: parseInt(m[1],10)*60 + parseFloat(m[2]), text: m[3].trim() });
+                return acc;
+            }, []).sort((a,b) => a.time - b.time);
+
+            // Build DOM
+            lyricsContent.innerHTML = '';
+            parsedLyrics.forEach(({ text }) => {
+                const li = document.createElement('li');
+                li.className = 'lyric-line';
+                li.textContent = text || '♪';
+                lyricsContent.appendChild(li);
+            });
+
+            activeIndex = -1;
+            syncLyrics();
+        } catch {
+            lyricsContent.innerHTML = '<li class="lyric-line active">♪</li>';
         }
+    }
 
-        function updateClock() {
-            const now = new Date();
-            let h = now.getHours(), m = now.getMinutes();
-            const ampm = h >= 12 ? 'pm' : 'am';
-            h = h % 12 || 12; 
-            const hStr = h < 10 ? ' ' + h : h.toString();
-            const mStr = m < 10 ? '0' + m : m.toString();
-            setDigit('h1', hStr[0]);
-            setDigit('h2', hStr[1]);
-            setDigit('m1', mStr[0]);
-            setDigit('m2', mStr[1]);
-            document.getElementById('ampm').innerText = ampm;
+    // Binary search — last lyric whose time ≤ t
+    function findActiveIndex(t) {
+        if (!parsedLyrics.length || t < parsedLyrics[0].time) return -1;
+        let lo = 0, hi = parsedLyrics.length - 1;
+        while (lo < hi) {
+            const mid = Math.ceil((lo+hi)/2);
+            if (parsedLyrics[mid].time <= t) lo = mid; else hi = mid-1;
         }
+        return lo;
+    }
 
-        setInterval(updateClock, 1000);
-        updateClock(); 
+    function syncLyrics() {
+        if (!parsedLyrics.length) return;
+        const idx = findActiveIndex(audio.currentTime + lyricsOffset);
+        if (idx === activeIndex) return;
+        activeIndex = idx;
 
-        // --- MUSIC & LYRICS ENGINE ---
-        const audio         = document.getElementById('audio-engine');
-        const vinylPlayer   = document.getElementById('vinyl-player');
-        const playIcon      = document.getElementById('play-icon');
-        const lyricsBox     = document.getElementById('lyrics-box');
-        const lyricsContent = document.getElementById('lyrics-content');
-        const restartBtn    = document.getElementById('restart-btn');
+        const lines = lyricsContent.querySelectorAll('.lyric-line');
+        lines.forEach((l, i) => l.classList.toggle('active', i === idx));
 
-        vinylPlayer.addEventListener('click', () => setPlayState(audio.paused));
-        restartBtn.addEventListener('click',  () => { audio.currentTime = 0; setPlayState(true); });
-
-        // lyricsOffset declared at top of script. Tune via the settings slider.
-        // Negative = lyrics trigger earlier. Positive = lyrics trigger later.
-
-        function setPlayState(playing) {
-            if (playing) {
-                audio.play();
-                vinylPlayer.classList.add('playing');
-                playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
-            } else {
-                audio.pause();
-                vinylPlayer.classList.remove('playing');
-                playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
-            }
+        // Scroll: measure actual DOM position — no hardcoded pixel math
+        if (idx >= 0 && lines[idx]) {
+            const boxH     = lyricsBox.offsetHeight;
+            const lineTop  = lines[idx].offsetTop;
+            const lineH    = lines[idx].offsetHeight;
+            const offset   = lineTop - (boxH/2) + (lineH/2);
+            lyricsContent.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+            lyricsContent.style.transform  = `translateY(-${Math.max(0,offset)}px)`;
+        } else {
+            lyricsContent.style.transition = 'none';
+            lyricsContent.style.transform  = 'translateY(0)';
         }
+    }
 
-        // ─── LYRICS ENGINE ────────────────────────────────────────────────────────
-        // Design: parse LRC → build DOM → on timeupdate, binary-search for the
-        // active line → measure its actual offsetTop → translateY the list so the
-        // active line sits centred in the box. No hardcoded pixel math.
+    // ── UI LISTENERS ────────────────────────────────────────────────────────────
+    document.getElementById('settings-btn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('settings-modal').style.display = 'block'; });
+    document.getElementById('close-settings-btn').addEventListener('click', () => { document.getElementById('settings-modal').style.display = 'none'; });
+    document.getElementById('send-btn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('send-modal').style.display = 'block'; });
+    document.getElementById('cancel-send-btn').addEventListener('click', () => { document.getElementById('send-modal').style.display = 'none'; resetSendMenu(); });
 
-        let parsedLyrics = [];    // [{ time: float, text: string }]
-        let activeIndex  = -1;    // track last active so we only re-render on change
+    document.addEventListener('click', e => {
+        const sm = document.getElementById('settings-modal'), sd = document.getElementById('send-modal');
+        if (sm.style.display === 'block' && !sm.contains(e.target)) sm.style.display = 'none';
+        if (sd.style.display === 'block' && !sd.contains(e.target) && !e.target.closest('#send-btn')) { sd.style.display = 'none'; resetSendMenu(); }
+    });
 
-        async function loadLyrics() {
-            try {
-                const res = await fetch('song.lrc');
-                if (!res.ok) throw new Error('no lrc');
-                const raw = await res.text();
-
-                // Parse: support [mm:ss.xx] and [mm:ss.xxx]
-                parsedLyrics = raw.split('\n').reduce((acc, line) => {
-                    const m = line.match(/\[(\d+):(\d{2}(?:\.\d+)?)\](.*)/);
-                    if (m) {
-                        acc.push({
-                            time: parseInt(m[1], 10) * 60 + parseFloat(m[2]),
-                            text: m[3].trim()
-                        });
-                    }
-                    return acc;
-                }, []).sort((a, b) => a.time - b.time); // guarantee time order
-
-                // Build DOM
-                lyricsContent.innerHTML = '';
-                parsedLyrics.forEach(({ text }) => {
-                    const li = document.createElement('li');
-                    li.className = 'lyric-line';
-                    li.textContent = text || '♪';
-                    lyricsContent.appendChild(li);
-                });
-
-                activeIndex = -1; // reset
-                syncLyrics();     // run once immediately (handles paused state)
-
-            } catch {
-                lyricsContent.innerHTML = '<li class="lyric-line active">our song ♪</li>';
-            }
-        }
-
-        // Binary search: find the last lyric whose time ≤ currentTime
-        function findActiveIndex(time) {
-            if (!parsedLyrics.length || time < parsedLyrics[0].time) return -1;
-            let lo = 0, hi = parsedLyrics.length - 1;
-            while (lo < hi) {
-                const mid = Math.ceil((lo + hi) / 2);
-                if (parsedLyrics[mid].time <= time) lo = mid;
-                else hi = mid - 1;
-            }
-            return lo;
-        }
-
-        function syncLyrics() {
-            if (!parsedLyrics.length) return;
-
-            const time  = audio.currentTime + lyricsOffset;
-            const index = findActiveIndex(time);
-
-            // Only re-render when the active line actually changes
-            if (index === activeIndex) return;
-            activeIndex = index;
-
-            const lines = lyricsContent.querySelectorAll('.lyric-line');
-
-            // Update active class
-            lines.forEach((line, i) => line.classList.toggle('active', i === index));
-
-            // Scroll: measure the active element's real offsetTop and centre it
-            if (index >= 0 && lines[index]) {
-                const boxHeight    = lyricsBox.offsetHeight;
-                const lineTop      = lines[index].offsetTop;
-                const lineHeight   = lines[index].offsetHeight;
-                const targetOffset = lineTop - (boxHeight / 2) + (lineHeight / 2);
-
-                // Smooth via CSS transition (set only on position changes)
-                lyricsContent.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
-                lyricsContent.style.transform  = `translateY(-${Math.max(0, targetOffset)}px)`;
-            } else {
-                // Before song starts — reset to top
-                lyricsContent.style.transition = 'none';
-                lyricsContent.style.transform  = 'translateY(0)';
-            }
-        }
-
-        audio.addEventListener('timeupdate', syncLyrics);
-
-        // --- UI LISTENERS ---
-        document.getElementById('settings-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.getElementById('settings-modal').style.display = 'block';
-        });
-        document.getElementById('close-settings-btn').addEventListener('click', () => {
-            document.getElementById('settings-modal').style.display = 'none';
-        });
-        document.getElementById('send-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.getElementById('send-modal').style.display = 'block';
-        });
-        document.getElementById('cancel-send-btn').addEventListener('click', () => {
-            document.getElementById('send-modal').style.display = 'none';
-            resetSendMenu();
-        });
-
-        // Click outside modal to close
-        document.addEventListener('click', (e) => {
-            const settingsModal = document.getElementById('settings-modal');
-            const sendModal = document.getElementById('send-modal');
-            if (settingsModal.style.display === 'block' && !settingsModal.contains(e.target)) {
-                settingsModal.style.display = 'none';
-            }
-            if (sendModal.style.display === 'block' && !sendModal.contains(e.target) && !e.target.closest('#send-btn')) {
-                sendModal.style.display = 'none';
-                resetSendMenu();
-            }
-        });
-
-        document.getElementById('clock-size').addEventListener('input', (e) => {
-            document.documentElement.style.setProperty('--clock-scale', e.target.value);
-            localStorage.setItem('loveClock_clockScale', e.target.value);
-        });
-        document.getElementById('ui-size').addEventListener('input', (e) => {
-            document.documentElement.style.setProperty('--ui-scale', e.target.value);
-            localStorage.setItem('loveClock_uiScale', e.target.value);
-        });
-        document.getElementById('lyrics-offset').addEventListener('input', (e) => {
-            lyricsOffset = parseFloat(e.target.value);
-            document.getElementById('offset-display').innerText = lyricsOffset.toFixed(1) + 's';
-            localStorage.setItem('loveClock_lyricsOffset', e.target.value);
-        });
-    </script>
+    document.getElementById('clock-size').addEventListener('input', e => { document.documentElement.style.setProperty('--clock-scale', e.target.value); localStorage.setItem('loveClock_clockScale', e.target.value); });
+    document.getElementById('ui-size').addEventListener('input', e => { document.documentElement.style.setProperty('--ui-scale', e.target.value); localStorage.setItem('loveClock_uiScale', e.target.value); });
+    document.getElementById('lyrics-offset').addEventListener('input', e => {
+        lyricsOffset = parseFloat(e.target.value);
+        document.getElementById('offset-display').innerText = lyricsOffset.toFixed(1)+'s';
+        localStorage.setItem('loveClock_lyricsOffset', e.target.value);
+    });
+</script>
 </body>
 </html>

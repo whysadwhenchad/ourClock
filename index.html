@@ -20,7 +20,7 @@
         #main-ui { display: none; width: 100%; height: 100%; gap: calc(20px * var(--ui-scale)); }
         #left-panel { flex: 3 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); display: flex; justify-content: center; align-items: center; position: relative; }
         #left-panel-content { display: flex; flex-direction: column; align-items: center; gap: calc(40px * var(--ui-scale)); }
-        #right-panel { flex: 1 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; position: relative; }
+        #right-panel { flex: 1 1 0%; min-width: 0; background-color: #000000; border-radius: calc(16px * var(--ui-scale)); padding: calc(30px * var(--ui-scale)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; position: relative; overflow-y: auto; }
         
         /* --- SMOOTH REVEAL ANIMATION --- */
         @keyframes smoothReveal {
@@ -42,7 +42,7 @@
             letter-spacing: 1px;
             line-height: 1.4; 
             word-wrap: break-word; 
-            opacity: 0;
+            opacity: 1;
         }
 
         #clock-container { display: flex; align-items: center; gap: calc(20px * var(--clock-scale)); --p: calc(10px * var(--clock-scale)); }
@@ -114,13 +114,9 @@
         #restart-btn:hover { opacity: 0.9; transform: scale(1.1); }
         .restart-icon { width: calc(24px * var(--ui-scale)); height: calc(24px * var(--ui-scale)); stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* FIXED: Locked position to relative so absolute content starts exactly at the top */
-        #lyrics-box { height: calc(75px * var(--ui-scale)); overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); pointer-events: none; }
-        
-        /* FIXED: Absolute positioning forces it to ignore flexbox centering rules */
-        #lyrics-content { position: absolute; top: 0; left: 0; width: 100%; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); margin: 0; padding: 0; list-style: none; text-align: left; }
-        
-        .lyric-line { height: calc(25px * var(--ui-scale)); line-height: calc(25px * var(--ui-scale)); font-size: calc(0.9rem * var(--ui-scale)); color: rgba(255, 255, 255, 0.3); transition: all 0.5s ease; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        #lyrics-box { height: calc(75px * var(--ui-scale)); overflow: hidden; display: flex; flex-direction: column; justify-content: center; mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); pointer-events: none; }
+        #lyrics-content { transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); margin: 0; padding: 0; list-style: none; text-align: left; }
+        .lyric-line { height: calc(25px * var(--ui-scale)); line-height: calc(25px * var(--ui-scale)); font-size: calc(0.9rem * var(--ui-scale)); color: rgba(255, 255, 255, 0.3); transition: all 0.5s ease; white-space: nowrap; text-overflow: ellipsis; }
         .lyric-line.active { color: #779E83; font-size: calc(1.1rem * var(--ui-scale)); font-weight: bold; }
 
     </style>
@@ -137,4 +133,437 @@
         <button id="settings-btn" class="fade-element">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon gear-icon">
                 <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
+
+        <div id="left-panel">
+            <div id="left-panel-content">
+                <div id="clock-container">
+                    <div class="digit" id="h1"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                    <div class="digit" id="h2"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                    <div class="colon"><div></div><div></div></div>
+                    <div class="digit" id="m1"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                    <div class="digit" id="m2"><div class="seg a"></div><div class="seg b"></div><div class="seg c"></div><div class="seg d"></div><div class="seg e"></div><div class="seg f"></div><div class="seg g"></div></div>
+                    <div id="ampm">am</div>
+                </div>
+                <button id="send-btn" class="fade-element">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon plane-icon">
+                        <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="right-panel">
+            <img id="update-image" src="" alt="Update" style="display: none;">
+            <div id="update-message">Waiting for updates...</div>
+        </div>
+
+        <div id="music-container" class="fade-element">
+            <audio id="audio-engine" src="song.mp3"></audio>
+            
+            <button id="restart-btn" title="Restart Song">
+                <svg viewBox="0 0 24 24" class="restart-icon">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+            </button>
+
+            <div id="vinyl-player">
+                <img id="vinyl-cover" src="cover.jpg" onerror="this.style.display='none'">
+                <div id="vinyl-hole"></div>
+                <svg id="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </div>
+
+            <div id="lyrics-box">
+                <ul id="lyrics-content">
+                    <li class="lyric-line active">Loading lyrics...</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <h2>change appearance</h2>
+        <div class="input-group"><label>clock size</label><input type="range" id="clock-size" min="0.4" max="1.8" step="0.05" value="1"></div>
+        <div class="input-group"><label>layout scale</label><input type="range" id="ui-size" min="0.5" max="1.5" step="0.05" value="1"></div>
+        <div class="input-group">
+            <label>lyrics offset (seconds): <span id="offset-display">0.0s</span></label>
+            <input type="range" id="lyrics-offset" min="-10" max="10" step="0.5" value="0">
+        </div>
+        <button id="close-settings-btn" class="modal-btn btn-primary" style="width: 100%;">done</button>
+        <button onclick="window.resetIdentity()" class="modal-btn btn-danger">switch lover</button>
+    </div>
+
+    <div id="send-modal" class="modal">
+        <h2>send a message</h2>
+        <div class="input-group">
+            <label>picture</label>
+            <div id="upload-box" onclick="document.getElementById('upload-image').click()">
+                <div id="upload-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-placeholder-icon">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>click to select photo</span>
+                </div>
+                <img id="upload-preview" src="" alt="Preview">
+            </div>
+            <input type="file" id="upload-image" accept="image/*" style="display: none;">
+        </div>
+        <div class="input-group"><label>message</label><textarea id="upload-text"></textarea></div>
+        <div class="modal-buttons">
+            <button id="cancel-send-btn" class="modal-btn btn-cancel">cancel</button>
+            <button id="submit-send-btn" class="modal-btn btn-primary">send &lt;3</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // --- FIREBASE INIT ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1poEPjr2l_Lakru0_tzSoVlSFkm0OLNI",
+            authDomain: "ourclock-7f9de.firebaseapp.com",
+            projectId: "ourclock-7f9de",
+            storageBucket: "ourclock-7f9de.firebasestorage.app",
+            messagingSenderId: "1016743428252",
+            appId: "1:1016743428252:web:fed353c991cbf5a121ad59"
+        };
+        
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch(e) {
+            console.error("Firebase init failed:", e);
+        }
+
+        let myId, partnerId, unsubscribe;
+        const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
+        let lastRenderedUrl = null;
+        let lastRenderedMsg = null;
+
+        // --- SYNC ENGINE ---
+        function renderScreenData(data) {
+            if (!data) return;
+            const newUrl = (data.imageUrl && data.imageUrl.trim() !== "") ? data.imageUrl : "";
+            const newMsg = (data.message && data.message.trim() !== "") ? data.message : "";
+            if (newUrl === lastRenderedUrl && newMsg === lastRenderedMsg) return;
+
+            const imgEl = document.getElementById('update-image'); 
+            const msgEl = document.getElementById('update-message');
+
+            const applyUpdates = () => {
+                imgEl.classList.remove('animate-reveal');
+                msgEl.classList.remove('animate-reveal');
+                void imgEl.offsetWidth;
+                void msgEl.offsetWidth;
+
+                if (newUrl !== "") {
+                    imgEl.src = newUrl;
+                    imgEl.style.display = "block";
+                    imgEl.classList.add('animate-reveal');
+                } else {
+                    imgEl.src = "";
+                    imgEl.style.display = "none";
+                }
+                
+                if (newMsg !== "") {
+                    msgEl.innerText = newMsg;
+                    msgEl.classList.add('animate-reveal');
+                } else {
+                    msgEl.innerText = "";
+                }
+
+                lastRenderedUrl = newUrl;
+                lastRenderedMsg = newMsg;
+            };
+
+            if (newUrl !== "" && newUrl !== lastRenderedUrl) {
+                const preloader = new Image();
+                preloader.onload = applyUpdates;
+                preloader.onerror = applyUpdates;
+                preloader.src = newUrl; 
+            } else {
+                applyUpdates();
+            }
+        }
+
+        window.setIdentity = async (id) => {
+            document.getElementById("startup-screen").style.display = "none";
+            document.getElementById("main-ui").style.display = "flex";
+            myId = id;
+            partnerId = id === "clock_A" ? "clock_B" : "clock_A";
+            localStorage.setItem("loveClock_id", id);
+            
+            loadLyrics();
+
+            if (!db) return;
+            try {
+                const docRef = doc(db, "screens", myId);
+                const snap = await getDoc(docRef);
+                if (snap.exists()) renderScreenData(snap.data());
+            } catch (err) {
+                console.warn("Initial fetch failed:", err);
+            }
+
+            if (unsubscribe) unsubscribe();
+            unsubscribe = onSnapshot(doc(db, "screens", myId), (snap) => {
+                if (snap.exists()) renderScreenData(snap.data());
+            });
+        };
+
+        window.resetIdentity = () => {
+            localStorage.removeItem("loveClock_id");
+            location.reload();
+        };
+
+        // --- RESTORE SAVED PREFERENCES ---
+        const savedClockScale = localStorage.getItem('loveClock_clockScale');
+        const savedUiScale = localStorage.getItem('loveClock_uiScale');
+        const savedLyricsOffset = localStorage.getItem('loveClock_lyricsOffset');
+
+        if (savedClockScale) {
+            document.documentElement.style.setProperty('--clock-scale', savedClockScale);
+            document.getElementById('clock-size').value = savedClockScale;
+        }
+        if (savedUiScale) {
+            document.documentElement.style.setProperty('--ui-scale', savedUiScale);
+            document.getElementById('ui-size').value = savedUiScale;
+        }
+        if (savedLyricsOffset) {
+            lyricsOffset = parseFloat(savedLyricsOffset);
+            document.getElementById('lyrics-offset').value = savedLyricsOffset;
+            document.getElementById('offset-display').innerText = parseFloat(savedLyricsOffset).toFixed(1) + 's';
+        }
+
+        const saved = localStorage.getItem("loveClock_id");
+        if (saved) window.setIdentity(saved);
+
+        // --- UPLOAD LOGIC ---
+        document.getElementById('upload-image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('upload-preview');
+            const placeholder = document.getElementById('upload-placeholder');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+        });
+
+        function resetSendMenu() {
+            document.getElementById('upload-text').value = "";
+            document.getElementById('upload-image').value = "";
+            document.getElementById('upload-preview').src = "";
+            document.getElementById('upload-preview').style.display = 'none';
+            document.getElementById('upload-placeholder').style.display = 'flex';
+        }
+
+        document.getElementById('submit-send-btn').addEventListener('click', async () => {
+            const file = document.getElementById('upload-image').files[0];
+            const msg = document.getElementById('upload-text').value;
+            const btn = document.getElementById('submit-send-btn');
+            btn.disabled = true;
+            btn.innerText = "sending...";
+            try {
+                let url = ""; 
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: 'POST', body: formData });
+                    const result = await res.json();
+                    url = result.data.url;
+                }
+                await setDoc(doc(db, "screens", partnerId), { message: msg, imageUrl: url }, { merge: true });
+                document.getElementById('send-modal').style.display = 'none';
+                resetSendMenu();
+            } catch (e) {
+                alert("Failed to send.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "send <3";
+            }
+        });
+
+        // --- CLOCK ENGINE ---
+        const digitMap = {
+            0: ['a','b','c','d','e','f'], 1: ['b','c'], 2: ['a','b','g','e','d'],
+            3: ['a','b','g','c','d'], 4: ['f','g','b','c'], 5: ['a','f','g','c','d'],
+            6: ['a','f','e','d','c','g'], 7: ['a','b','c'], 8: ['a','b','c','d','e','f','g'],
+            9: ['a','b','c','d','f','g']
+        };
+
+        function setDigit(id, num) {
+            const el = document.getElementById(id);
+            el.querySelectorAll('.seg').forEach(s => s.classList.remove('on'));
+            if (num !== ' ' && digitMap[parseInt(num)]) {
+                digitMap[parseInt(num)].forEach(c => el.querySelector('.seg.' + c).classList.add('on'));
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let h = now.getHours(), m = now.getMinutes();
+            const ampm = h >= 12 ? 'pm' : 'am';
+            h = h % 12 || 12; 
+            const hStr = h < 10 ? ' ' + h : h.toString();
+            const mStr = m < 10 ? '0' + m : m.toString();
+            setDigit('h1', hStr[0]);
+            setDigit('h2', hStr[1]);
+            setDigit('m1', mStr[0]);
+            setDigit('m2', mStr[1]);
+            document.getElementById('ampm').innerText = ampm;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock(); 
+
+        // --- MUSIC & LYRICS ENGINE ---
+        const audio = document.getElementById('audio-engine');
+        const vinylPlayer = document.getElementById('vinyl-player');
+        const playIcon = document.getElementById('play-icon');
+        const lyricsContent = document.getElementById('lyrics-content');
+        const restartBtn = document.getElementById('restart-btn');
+        let parsedLyrics = [];
+
+        // Offset in seconds — tune via the settings slider if lyrics are early/late.
+        // Negative = lyrics trigger earlier. Positive = lyrics trigger later.
+        let lyricsOffset = 0;
+
+        function setPlayState(playing) {
+            if (playing) {
+                audio.play();
+                vinylPlayer.classList.add('playing');
+                playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+            } else {
+                audio.pause();
+                vinylPlayer.classList.remove('playing');
+                playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+            }
+        }
+
+        async function loadLyrics() {
+            try {
+                const response = await fetch('song.lrc');
+                if (!response.ok) throw new Error("LRC file not found");
+                const text = await response.text();
+                
+                parsedLyrics = text.split('\n').map(line => {
+                    const match = line.match(/\[(\d{2}):(\d{2}\.\d{2})\](.*)/);
+                    if (match) {
+                        const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
+                        return { time, text: match[3].trim() };
+                    }
+                    return null;
+                }).filter(l => l !== null);
+
+                lyricsContent.innerHTML = '';
+                parsedLyrics.forEach((lyric) => {
+                    const li = document.createElement('li');
+                    li.className = 'lyric-line';
+                    li.innerText = lyric.text || "♪";
+                    lyricsContent.appendChild(li);
+                });
+                
+            } catch (err) {
+                lyricsContent.innerHTML = '<li class="lyric-line active">our song.mp3</li>';
+                console.log("No LRC found, falling back to static title.");
+            }
+        }
+
+        vinylPlayer.addEventListener('click', () => {
+            setPlayState(audio.paused);
+        });
+
+        restartBtn.addEventListener('click', () => {
+            audio.currentTime = 0;
+            setPlayState(true);
+        });
+
+        // Synchronize Lyrics with offset applied
+        audio.addEventListener('timeupdate', () => {
+            if (parsedLyrics.length === 0) return;
+            
+            // Apply offset: shift the perceived playback time so lyrics
+            // fire earlier (negative offset) or later (positive offset)
+            const time = audio.currentTime + lyricsOffset;
+            let activeIndex = 0;
+            
+            for (let i = 0; i < parsedLyrics.length; i++) {
+                if (time >= parsedLyrics[i].time) {
+                    activeIndex = i;
+                } else {
+                    break;
+                }
+            }
+
+            const lines = lyricsContent.querySelectorAll('.lyric-line');
+            lines.forEach((line, index) => {
+                line.classList.toggle('active', index === activeIndex);
+            });
+
+            const uiScale = parseFloat(getComputedStyle(document.body).getPropertyValue('--ui-scale')) || 1;
+            const lineHeight = 25 * uiScale;
+            const offset = (activeIndex * lineHeight) - lineHeight;
+            lyricsContent.style.transform = `translateY(-${offset}px)`;
+        });
+
+        // --- UI LISTENERS ---
+        document.getElementById('settings-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('settings-modal').style.display = 'block';
+        });
+        document.getElementById('close-settings-btn').addEventListener('click', () => {
+            document.getElementById('settings-modal').style.display = 'none';
+        });
+        document.getElementById('send-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('send-modal').style.display = 'block';
+        });
+        document.getElementById('cancel-send-btn').addEventListener('click', () => {
+            document.getElementById('send-modal').style.display = 'none';
+            resetSendMenu();
+        });
+
+        // Click outside modal to close
+        document.addEventListener('click', (e) => {
+            const settingsModal = document.getElementById('settings-modal');
+            const sendModal = document.getElementById('send-modal');
+            if (settingsModal.style.display === 'block' && !settingsModal.contains(e.target)) {
+                settingsModal.style.display = 'none';
+            }
+            if (sendModal.style.display === 'block' && !sendModal.contains(e.target) && !e.target.closest('#send-btn')) {
+                sendModal.style.display = 'none';
+                resetSendMenu();
+            }
+        });
+
+        document.getElementById('clock-size').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--clock-scale', e.target.value);
+            localStorage.setItem('loveClock_clockScale', e.target.value);
+        });
+        document.getElementById('ui-size').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--ui-scale', e.target.value);
+            localStorage.setItem('loveClock_uiScale', e.target.value);
+        });
+        document.getElementById('lyrics-offset').addEventListener('input', (e) => {
+            lyricsOffset = parseFloat(e.target.value);
+            document.getElementById('offset-display').innerText = lyricsOffset.toFixed(1) + 's';
+            localStorage.setItem('loveClock_lyricsOffset', e.target.value);
+        });
+    </script>
+</body>
+</html>

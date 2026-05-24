@@ -15,9 +15,12 @@
         #startup-screen h1 { color: #779E83; margin-bottom: 40px; font-size: 3rem; letter-spacing: 1px; text-transform: lowercase; font-weight: normal; }
         .identity-btn { background-color: #222; color: white; border: 2px solid #779E83; padding: 20px 40px; font-size: 1.5rem; border-radius: 12px; margin: 10px; cursor: pointer; transition: all 0.2s; width: 300px; text-transform: lowercase; letter-spacing: 1px; font-family: inherit; }
         .identity-btn:hover { background-color: #779E83; color: #111; }
-        #install-btn { display: none; position: absolute; bottom: 24px; right: 24px; background: none; border: 1px solid rgba(119,158,131,0.35); color: rgba(119,158,131,0.7); border-radius: 10px; padding: 10px 16px; font-family: inherit; font-size: 0.8rem; text-transform: lowercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; gap: 8px; align-items: center; }
+        #install-btn { position: absolute; bottom: 24px; right: 24px; background: none; border: 1px solid rgba(119,158,131,0.35); color: rgba(119,158,131,0.7); border-radius: 10px; padding: 10px 16px; font-family: inherit; font-size: 0.8rem; text-transform: lowercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; display: flex; gap: 8px; align-items: center; }
         #install-btn:hover { border-color: #779E83; color: #779E83; background: rgba(119,158,131,0.07); }
         #install-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+        #install-toast { display: none; position: absolute; bottom: 70px; right: 24px; background: #1c1c1c; border: 1px solid #333; border-radius: 10px; padding: 14px 16px; font-size: 0.78rem; color: #bbb; line-height: 1.7; max-width: 220px; text-align: left; box-shadow: 0 8px 32px rgba(0,0,0,0.7); }
+        #install-toast.visible { display: block; }
+        #install-toast strong { color: #779E83; display: block; margin-bottom: 4px; font-size: 0.8rem; }
 
         /* ── LAYOUT ──────────────────────────────────────────────────────────── */
         #main-ui { display: none; width: 100%; height: 100%; gap: calc(20px * var(--ui-scale)); }
@@ -269,8 +272,9 @@
     <button class="identity-btn" onclick="window.setIdentity('clock_B')">loverboy</button>
     <button id="install-btn">
         <svg viewBox="0 0 24 24"><path d="M12 2v13M7 11l5 5 5-5"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>
-        add to home screen
+        add to home screen :3
     </button>
+    <div id="install-toast"></div>
 </div>
 
 <div id="main-ui">
@@ -690,23 +694,61 @@
 
     // ── PWA INSTALL BUTTON ───────────────────────────────────────────────────────
     let deferredInstallPrompt = null;
-    const installBtn = document.getElementById('install-btn');
+    const installBtn   = document.getElementById('install-btn');
+    const installToast = document.getElementById('install-toast');
 
+    // Capture the native prompt on browsers that support it (Chrome/Edge/Android)
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         deferredInstallPrompt = e;
-        installBtn.style.display = 'flex';
     });
 
+    // Detect platform for fallback instructions
+    function getInstallInstructions() {
+        const ua = navigator.userAgent;
+        const isIOS     = /iphone|ipad|ipod/i.test(ua);
+        const isSafari  = /safari/i.test(ua) && !/chrome/i.test(ua);
+        const isAndroid = /android/i.test(ua);
+        const isFirefox = /firefox/i.test(ua);
+
+        if (isIOS || isSafari) {
+            return '<strong>safari on ios</strong>tap the <b>share</b> button ↑ at the bottom of your browser, then tap <b>add to home screen</b>.';
+        } else if (isAndroid) {
+            return '<strong>android</strong>tap the <b>⋮ menu</b> in your browser, then tap <b>add to home screen</b> or <b>install app</b>.';
+        } else if (isFirefox) {
+            return '<strong>firefox</strong>click the <b>⋯ menu</b> → <b>install</b>, or look for the install icon in the address bar.';
+        } else {
+            return '<strong>desktop</strong>click the <b>install</b> icon in the address bar, or open the browser menu and choose <b>install app</b>.';
+        }
+    }
+
+    let toastTimeout;
     installBtn.addEventListener('click', async () => {
-        if (!deferredInstallPrompt) return;
-        deferredInstallPrompt.prompt();
-        const { outcome } = await deferredInstallPrompt.userChoice;
-        if (outcome === 'accepted') installBtn.style.display = 'none';
-        deferredInstallPrompt = null;
+        // If native prompt is available, use it directly
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            if (outcome === 'accepted') installBtn.style.display = 'none';
+            return;
+        }
+        // Otherwise toggle the instruction toast
+        if (installToast.classList.contains('visible')) {
+            installToast.classList.remove('visible');
+            clearTimeout(toastTimeout);
+            return;
+        }
+        installToast.innerHTML = getInstallInstructions();
+        installToast.classList.add('visible');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => installToast.classList.remove('visible'), 6000);
     });
 
-    // Hide install btn if already installed
+    // Hide if already running as installed PWA
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        installBtn.style.display = 'none';
+    }
+
     window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
 </script>
 </body>

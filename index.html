@@ -246,6 +246,7 @@
         const IMGBB_KEY = "f5738c52c2302be7a4dbb978a7e7ef28";
         let lastRenderedUrl = null;
         let lastRenderedMsg = null;
+        let lyricsOffset = 0;
 
         // --- SYNC ENGINE ---
         function renderScreenData(data) {
@@ -439,9 +440,8 @@
         const restartBtn = document.getElementById('restart-btn');
         let parsedLyrics = [];
 
-        // Offset in seconds — tune via the settings slider if lyrics are early/late.
+        // lyricsOffset declared at top of script. Tune via the settings slider.
         // Negative = lyrics trigger earlier. Positive = lyrics trigger later.
-        let lyricsOffset = 0;
 
         function setPlayState(playing) {
             if (playing) {

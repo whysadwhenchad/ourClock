@@ -59,11 +59,13 @@
         .fade-element { transition: opacity 1.2s ease; opacity: 1; z-index: 50; }
         .fade-element.idle { opacity: 0 !important; pointer-events: none; }
         #settings-btn { position: absolute; top: calc(25px * var(--ui-scale)); left: calc(25px * var(--ui-scale)); background: none; border: none; cursor: pointer; padding: 0; z-index: 60; }
+        #fullscreen-btn { position: absolute; top: calc(25px * var(--ui-scale)); left: calc(70px * var(--ui-scale)); background: none; border: none; cursor: pointer; padding: 0; z-index: 60; }
         #send-btn { background: none; border: none; cursor: pointer; padding: 0; z-index: 60; }
         .svg-icon { stroke: #fff; opacity: 0.3; transition: opacity 0.3s, transform 0.4s; }
         .gear-icon { width: calc(32px * var(--ui-scale)); height: calc(32px * var(--ui-scale)); }
         .plane-icon { width: calc(45px * var(--ui-scale)); height: calc(45px * var(--ui-scale)); }
-        #settings-btn:hover .svg-icon, #send-btn:hover .svg-icon { opacity: 0.8; }
+        .fs-icon { width: calc(28px * var(--ui-scale)); height: calc(28px * var(--ui-scale)); }
+        #settings-btn:hover .svg-icon, #send-btn:hover .svg-icon, #fullscreen-btn:hover .svg-icon { opacity: 0.8; }
         #send-btn:hover .plane-icon { transform: translate(3px, -3px) scale(1.1); }
 
         /* ── MODALS ──────────────────────────────────────────────────────────── */
@@ -291,6 +293,21 @@
         </svg>
     </button>
 
+    <button id="fullscreen-btn" class="fade-element" title="fullscreen">
+        <svg id="fs-expand" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon fs-icon">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        <svg id="fs-compress" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon fs-icon" style="display:none;">
+            <polyline points="4 14 10 14 10 20"></polyline>
+            <polyline points="20 10 14 10 14 4"></polyline>
+            <line x1="10" y1="14" x2="3" y2="21"></line>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+        </svg>
+    </button>
+
     <div id="left-panel">
         <div id="left-panel-content">
             <div id="clock-container">
@@ -310,7 +327,7 @@
         </div>
 
         <!-- ── MUSIC PLAYER ── -->
-        <div id="music-container" class="fade-element">
+        <div id="music-container">
             <audio id="audio-engine" src="song.mp3" preload="auto"></audio>
 
             <!-- vinyl -->
@@ -464,6 +481,13 @@
         document.getElementById("main-ui").style.display = "flex";
         myId = id; partnerId = id === "clock_A" ? "clock_B" : "clock_A";
         localStorage.setItem("loveClock_id", id);
+
+        // Enter fullscreen automatically on identity selection
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+
         loadLyrics();
         if (!db) return;
         try { const snap = await getDoc(doc(db, "screens", myId)); if (snap.exists()) renderScreenData(snap.data()); }
@@ -677,6 +701,33 @@
         document.getElementById('offset-display').innerText = lyricsOffset.toFixed(1)+'s';
         localStorage.setItem('loveClock_lyricsOffset', e.target.value);
     });
+
+    // ── FULLSCREEN BUTTON ────────────────────────────────────────────────────────
+    function isFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+    }
+
+    function updateFsIcons() {
+        document.getElementById('fs-expand').style.display   = isFullscreen() ? 'none'  : '';
+        document.getElementById('fs-compress').style.display = isFullscreen() ? ''      : 'none';
+    }
+
+    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+        if (isFullscreen()) {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+        } else {
+            const el = document.documentElement;
+            if (el.requestFullscreen) el.requestFullscreen();
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+        }
+    });
+
+    document.addEventListener('fullscreenchange',       updateFsIcons);
+    document.addEventListener('webkitfullscreenchange', updateFsIcons);
+    document.addEventListener('mozfullscreenchange',    updateFsIcons);
 
     // ── IDLE FADE ────────────────────────────────────────────────────────────────
     // Fade out settings + send + music player after 4s of no mouse/touch activity.

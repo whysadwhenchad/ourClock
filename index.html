@@ -94,32 +94,29 @@
         .btn-primary { background: #779E83; color: #111; }
         .btn-danger { background: #551111; color: white; width: 100%; margin-top: 20px; }
 
-        /* --- NEW MUSIC PLAYER & LYRICS STYLING --- */
+        /* --- MUSIC PLAYER & LYRICS STYLING --- */
         #music-container { position: absolute; bottom: calc(25px * var(--ui-scale)); left: calc(25px * var(--ui-scale)); display: flex; align-items: center; gap: calc(20px * var(--ui-scale)); z-index: 50; }
         
         #vinyl-player { position: relative; width: calc(80px * var(--ui-scale)); height: calc(80px * var(--ui-scale)); border-radius: 50%; background-color: #111; display: flex; justify-content: center; align-items: center; cursor: pointer; border: 2px solid #333; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: border-color 0.3s; }
         #vinyl-player:hover { border-color: #779E83; }
         
-        /* The Vinyl Spin Animation */
         @keyframes spin { 100% { transform: rotate(360deg); } }
         #vinyl-cover { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; animation: spin 4s linear infinite; animation-play-state: paused; opacity: 0.6; transition: opacity 0.3s; }
         #vinyl-player.playing #vinyl-cover { animation-play-state: running; opacity: 0.9; }
         
-        /* The center hole of the record */
         #vinyl-hole { position: absolute; width: calc(12px * var(--ui-scale)); height: calc(12px * var(--ui-scale)); background-color: #1a1a1a; border-radius: 50%; z-index: 2; border: 1px solid #333; }
         
-        /* Play/Pause Icon Overlay */
         #play-icon { position: absolute; width: calc(24px * var(--ui-scale)); height: calc(24px * var(--ui-scale)); fill: rgba(255,255,255,0.8); z-index: 3; pointer-events: none; transition: opacity 0.2s; }
         #vinyl-player.playing #play-icon { opacity: 0; }
         #vinyl-player:hover #play-icon { opacity: 1; fill: #fff; }
 
-        /* Restart Button */
         #restart-btn { background: none; border: none; cursor: pointer; padding: 0; outline: none; opacity: 0.4; transition: opacity 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; margin-right: calc(10px * var(--ui-scale)); }
         #restart-btn:hover { opacity: 0.9; transform: scale(1.1); }
         .restart-icon { width: calc(24px * var(--ui-scale)); height: calc(24px * var(--ui-scale)); stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* Lyric Scroller */
         #lyrics-box { height: calc(75px * var(--ui-scale)); overflow: hidden; display: flex; flex-direction: column; justify-content: center; mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); pointer-events: none; }
+        
+        /* Updated: transform is completely handed off to JS calc variables to prevent jumping */
         #lyrics-content { transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); margin: 0; padding: 0; list-style: none; text-align: left; }
         .lyric-line { height: calc(25px * var(--ui-scale)); line-height: calc(25px * var(--ui-scale)); font-size: calc(0.9rem * var(--ui-scale)); color: rgba(255, 255, 255, 0.3); transition: all 0.5s ease; white-space: nowrap; text-overflow: ellipsis; }
         .lyric-line.active { color: #779E83; font-size: calc(1.1rem * var(--ui-scale)); font-weight: bold; }
@@ -369,8 +366,9 @@
                 if (!response.ok) throw new Error("LRC file not found");
                 const text = await response.text();
                 
+                // Flexible regex to capture [MM:SS.XX] or [MM:SS]
                 parsedLyrics = text.split('\n').map(line => {
-                    const match = line.match(/\[(\d{2}):(\d{2}\.\d{2})\](.*)/);
+                    const match = line.match(/\[(\d+):(\d+(?:\.\d+)?)\](.*)/);
                     if (match) {
                         const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
                         return { time, text: match[3].trim() };
@@ -378,17 +376,21 @@
                     return null;
                 }).filter(l => l !== null);
 
-                // Build invisible list in HTML
+                // Build HTML list
                 lyricsContent.innerHTML = '';
-                parsedLyrics.forEach((lyric, index) => {
+                parsedLyrics.forEach((lyric) => {
                     const li = document.createElement('li');
                     li.className = 'lyric-line';
-                    li.innerText = lyric.text || "♪"; // Music note for blank lines
+                    li.innerText = lyric.text || "♪"; 
                     lyricsContent.appendChild(li);
                 });
+
+                // Default empty state before song starts
+                lyricsContent.style.transform = `translateY(calc(25px * var(--ui-scale)))`;
                 
             } catch (err) {
-                lyricsContent.innerHTML = '<li class="lyric-line active">our song.mp3</li>';
+                lyricsContent.innerHTML = '<li class="lyric-line active">song.mp3</li>';
+                lyricsContent.style.transform = `translateY(calc(25px * var(--ui-scale)))`;
                 console.log("No LRC found, falling back to static title.");
             }
         }
@@ -414,6 +416,8 @@
                 vinylPlayer.classList.add('playing');
                 playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
             }
+            // Force lyrics to instantly recalculate and snap back
+            audio.dispatchEvent(new Event('timeupdate'));
         });
 
         // Synchronize Lyrics Loop
@@ -421,9 +425,9 @@
             if (parsedLyrics.length === 0) return;
             
             const time = audio.currentTime;
-            let activeIndex = 0;
             
-            // Find current lyric index based on time
+            // Default state: -1 means song hasn't reached the very first line yet
+            let activeIndex = -1; 
             for (let i = 0; i < parsedLyrics.length; i++) {
                 if (time >= parsedLyrics[i].time) {
                     activeIndex = i;
@@ -432,7 +436,7 @@
                 }
             }
 
-            // Update highlighting
+            // Highlight the active line (or highlight nothing if -1)
             const lines = lyricsContent.querySelectorAll('.lyric-line');
             lines.forEach((line, index) => {
                 if (index === activeIndex) {
@@ -442,11 +446,10 @@
                 }
             });
 
-            // Smooth Scroll Calculation (Slide up based on index height)
-            // 25px is the exact height of one line defined in our CSS
-            const uiScale = parseFloat(getComputedStyle(document.body).getPropertyValue('--ui-scale'));
-            const offset = (activeIndex * 25 * uiScale) - (25 * uiScale); // keep active line in middle
-            lyricsContent.style.transform = `translateY(-${offset}px)`;
+            // Smooth Scroll via GPU Calc
+            const scrollIndex = Math.max(0, activeIndex);
+            const offset = 25 - (scrollIndex * 25);
+            lyricsContent.style.transform = `translateY(calc(${offset}px * var(--ui-scale)))`;
         });
 
         // --- UI Listeners ---

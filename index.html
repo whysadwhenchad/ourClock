@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>:3</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111111">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content=":3">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --clock-scale: 1; --ui-scale: 1; }
@@ -272,7 +278,7 @@
     <button class="identity-btn" onclick="window.setIdentity('clock_B')">loverboy</button>
     <button id="install-btn">
         <svg viewBox="0 0 24 24"><path d="M12 2v13M7 11l5 5 5-5"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>
-        add to home screen :3
+        add to home screen
     </button>
     <div id="install-toast"></div>
 </div>
@@ -750,6 +756,12 @@
     }
 
     window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
+
+    // ── SERVICE WORKER ───────────────────────────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(e => console.warn('SW:', e));
+    }
+
 </script>
 </body>
 </html>

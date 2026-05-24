@@ -208,14 +208,26 @@
             padding: calc(2px * var(--ui-scale)) 0;
             font-size: calc(0.72rem * var(--ui-scale));
             line-height: 1.55;
-            color: rgba(255,255,255,0.2);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            transition: color 0.35s ease, font-size 0.35s ease;
+            transition: font-size 0.35s ease;
         }
         .lyric-line.active {
-            color: #779E83;
             font-size: calc(0.85rem * var(--ui-scale));
             font-weight: bold;
+        }
+        /* word spans — inactive line */
+        .lyric-line .word {
+            display: inline;
+            color: rgba(255,255,255,0.2);
+            transition: color 0.15s ease;
+        }
+        /* words in the active line but not yet sung — dim white */
+        .lyric-line.active .word {
+            color: rgba(255,255,255,0.35);
+        }
+        /* the word currently being sung */
+        .lyric-line.active .word.active-word {
+            color: #779E83;
         }
 
         /* progress row */
@@ -343,7 +355,7 @@
             <!-- info + lyrics + progress -->
             <div id="player-body">
                 <div id="song-meta">
-                    <span id="song-title">reflections</span>
+                    <span id="song-title">our song</span>
                     <span id="song-artist"></span>
                 </div>
 

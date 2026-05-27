@@ -343,7 +343,7 @@
             <!-- info + lyrics + progress -->
             <div id="player-body">
                 <div id="song-meta">
-                    <span id="song-title">reflections</span>
+                    <span id="song-title">our song</span>
                     <span id="song-artist"></span>
                 </div>
 
@@ -812,6 +812,44 @@
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(e => console.warn('SW:', e));
     }
+
+    // ── WAKE LOCK — keep screen on while app is open ─────────────────────────────
+    let wakeLock = null;
+    async function requestWakeLock() {
+        if (!('wakeLock' in navigator)) return;
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+        } catch (e) {
+            console.warn('Wake lock failed:', e);
+        }
+    }
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') requestWakeLock();
+    });
+    requestWakeLock();
+
+    // Safari/iPadOS fallback — silent looping audio keeps the screen alive.
+    // A 1-second silent buffer is generated via Web Audio and set to loop forever.
+    // It only starts after the first user interaction (browser autoplay policy).
+    let silentStarted = false;
+    function startSilentAudio() {
+        if (silentStarted) return;
+        silentStarted = true;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); // 1s silence
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            src.loop = true;
+            src.connect(ctx.destination);
+            src.start();
+        } catch (e) {
+            console.warn('Silent audio fallback failed:', e);
+        }
+    }
+    // Trigger on first touch or click — satisfies autoplay policy on all browsers
+    document.addEventListener('click',      startSilentAudio, { once: true });
+    document.addEventListener('touchstart', startSilentAudio, { once: true, passive: true });
 
 </script>
 </body>
